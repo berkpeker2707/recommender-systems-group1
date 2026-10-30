@@ -1,0 +1,75 @@
+{
+  "n_users": 6040,
+  "n_items_rated": 3706,
+  "n_items_catalogue": 3883,
+  "n_items_never_rated": 177,
+  "n_interactions": 1000209,
+  "density_rated_items": 0.044683625622312845,
+  "per_user": {
+    "min": 20,
+    "median": 96.0,
+    "mean": 165.5975165562914,
+    "max": 2314
+  },
+  "per_item": {
+    "min": 1,
+    "median": 123.5,
+    "mean": 269.88909875876953,
+    "max": 3428
+  },
+  "top20pct_items_share": 0.6667556480695535,
+  "items_lt20_ratings_pct": 0.21632758176667524,
+  "rating_dist": {
+    "1": 56174,
+    "2": 107557,
+    "3": 261197,
+    "4": 348971,
+    "5": 226310
+  },
+  "positive_share": 0.5751607913945985,
+  "first_rating": "2000-04-25 23:05:32",
+  "last_rating": "2003-02-28 17:49:50",
+  "ratings_by_year": {
+    "2000": 904757,
+    "2001": 68058,
+    "2002": 24046,
+    "2003": 3348
+  },
+  "split": {
+    "train": {
+      "rows": 800164,
+      "users": 5400,
+      "items": 3662,
+      "positive_share": 0.5786526262116266
+    },
+    "val": {
+      "rows": 100024,
+      "users": 1134,
+      "items": 3305,
+      "positive_share": 0.577981284491722,
+      "users_seen_in_train": 523,
+      "users_new": 611,
+      "items_new": 16
+    },
+    "test": {
+      "rows": 100021,
+      "users": 1209,
+      "items": 3407,
+      "positive_share": 0.5444056748082903,
+      "users_seen_in_train": 1009,
+      "users_new": 200,
+      "items_new": 33,
+      "users_seen_in_train_or_val": 1180
+    }
+  },
+  "split_cuts": {
+    "t1": "2000-12-02 14:52:18",
+    "t2": "2000-12-29 23:43:34",
+    "n_train": 800164,
+    "n_val": 100024,
+    "n_test": 100021,
+    "frac_train": 0.7999968006686603,
+    "frac_val": 0.10000309935223538,
+    "frac_test": 0.10000009997910436
+  }
+}

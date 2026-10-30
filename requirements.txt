@@ -1,0 +1,7 @@
+# Python version: 3.11.17  (also stated in README; venv created with `uv venv --python 3.11`)
+numpy==2.4.6
+pandas==3.1.0
+scipy==1.17.1           # sparse matrices for kNN / similarity
+matplotlib==3.11.2      # EDA plots
+# Dev only
+pytest==9.2.0
