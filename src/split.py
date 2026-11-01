@@ -1,5 +1,5 @@
 """
-split.py — temporal train / validation / test split (Lecture 3.1 slide 4).
+split.py — temporal train & validation & test split
 
 Protocol (decisions to justify in the report, 1–2 sentences each):
 1. Sort all ratings by timestamp. Cut at the interaction quantiles in

@@ -7,8 +7,7 @@ Top-N version for implicit feedback (own implementation):
 2. Keep only the k most similar neighbours per item (sparsify). Negative similarities
    (possible with adjusted cosine) are dropped: in a top-N sum they would only push
    items down for reasons unrelated to the user's taste for them.
-3. Optional shrinkage: sim * min(n_common, γ)/γ (significance weighting, slide 10).
-4. score(u, i) = Σ_{j ∈ history(u)} sim_k(i, j)     (binary history)
+3. score(u, i) = Σ_{j ∈ history(u)} sim_k(i, j)     (binary history)
 Tuning: grid over k × similarity on VALIDATION NDCG@10 (config grids).
 
 Implementation: scipy.sparse; the 3.7k × 3.7k similarity matrix fits easily in memory.
@@ -20,7 +19,7 @@ from src.models.base import Recommender
 from src.split import to_csr
 
 
-def item_similarity(train, n_users, n_items, similarity: str, shrinkage: int = 0) -> np.ndarray:
+def item_similarity(train, n_users, n_items, similarity: str) -> np.ndarray:
     """Full (dense) item × item similarity with zero diagonal."""
     X = to_csr(train, n_users, n_items, values="binary")
     co = (X.T @ X).toarray()                       # co[i, j] = #users who rated both
@@ -42,8 +41,6 @@ def item_similarity(train, n_users, n_items, similarity: str, shrinkage: int = 0
     else:
         raise ValueError(f"unknown similarity {similarity!r}")
 
-    if shrinkage > 0:
-        S = S * np.minimum(co, shrinkage) / shrinkage
     np.fill_diagonal(S, 0.0)
     return S.astype(np.float32)
 
@@ -62,17 +59,14 @@ def keep_top_k(S: np.ndarray, k: int) -> sp.csr_matrix:
 
 
 class ItemKNN(Recommender):
-    def __init__(self, k: int, similarity: str = "cosine", shrinkage: int = 0):
+    def __init__(self, k: int, similarity: str = "cosine"):
         self.k = k
         self.similarity = similarity
-        self.shrinkage = shrinkage
         self.name = f"item_knn_{similarity}_k{k}"
 
-    def fit(self, train, n_users, n_items, sim_full: np.ndarray = None):
-        """sim_full: optional precomputed item_similarity(...) to avoid recomputing it for every k."""
-        if sim_full is None:
-            sim_full = item_similarity(train, n_users, n_items, self.similarity, self.shrinkage)
-        self.S_k = keep_top_k(sim_full, self.k)          # row i = neighbours of target item i
+    def fit(self, train, n_users, n_items):
+        S = item_similarity(train, n_users, n_items, self.similarity)
+        self.S_k = keep_top_k(S, self.k)                 # row i = neighbours of target item i
         self.X = to_csr(train, n_users, n_items, values="binary")
         return self
 
@@ -81,4 +75,4 @@ class ItemKNN(Recommender):
         return np.asarray((self.X[user_indices] @ self.S_k.T).todense())
 
     def params(self):
-        return {"k": self.k, "similarity": self.similarity, "shrinkage": self.shrinkage}
+        return {"k": self.k, "similarity": self.similarity}

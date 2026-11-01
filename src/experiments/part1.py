@@ -29,7 +29,7 @@ from src import eda, plots
 from src.data.load import add_indices, build_id_maps, load_movies, load_ratings
 from src.evaluation.evaluator import evaluate
 from src.evaluation.stats import mean_ci
-from src.models.item_knn import ItemKNN, item_similarity
+from src.models.item_knn import ItemKNN
 from src.models.popularity import MostPopular
 from src.results import make_row, write_results
 from src.split import eval_users, ground_truth, temporal_split, to_csr
@@ -37,25 +37,13 @@ from src.split import eval_users, ground_truth, temporal_split, to_csr
 log = logging.getLogger(__name__)
 
 
-class Setting:
-    """One (fit data, target data) pair with its evaluated users and ground truth."""
-
-    def __init__(self, name, fit_df, target_df, n_users, n_items, min_train):
-        self.name, self.fit_df = name, fit_df
-        self.n_users, self.n_items = n_users, n_items
-        self.csr = to_csr(fit_df, n_users, n_items, values="binary")
-        self.target_df = target_df
-        self.set_min_train(min_train)
-
-    def set_min_train(self, min_train):
-        self.users, self.drop_stats = eval_users(self.fit_df, self.target_df, min_train,
-                                                 config.POSITIVE_THRESHOLD)
-        self.gt = ground_truth(self.target_df, config.POSITIVE_THRESHOLD, self.users)
-
-    def run(self, model):
-        summary, per_user, _ = evaluate(model, self.csr, self.gt, self.users, config.TOP_K,
-                                        config.EXCLUDE_SEEN)
-        return summary, per_user
+def score_model(model, fit_df, target_df, maps, min_train=config.MIN_TRAIN_INTERACTIONS):
+    """Score a fitted model on target_df, using users with >= min_train ratings in fit_df."""
+    users, _ = eval_users(fit_df, target_df, min_train, config.POSITIVE_THRESHOLD)
+    gt = ground_truth(target_df, config.POSITIVE_THRESHOLD, users)
+    seen = to_csr(fit_df, maps.n_users, maps.n_items, values="binary")
+    summary, per_user, _ = evaluate(model, seen, gt, users, config.TOP_K)
+    return summary, per_user
 
 
 def popularity_models():
@@ -70,32 +58,44 @@ def fmt(summary):
 
 def run(data_dir, out_dir):
     np.random.seed(config.SEED)
+
+    # best k elements for each user are returned in order of decreasing score, so the
+    # first element is the top-1 recommendation, second is top-2, etc.
     k = config.TOP_K
+
+    # normalized discounted cumulative gaini. it means how many films the user has seen in the top-k recommendations, weighted by their position in the list
+    # if they are down, the score is lower. the score is normalized by the ideal scoreç
     ndcg = f"ndcg@{k}"
 
-    # ---------------------------------------------------------------- 1. data
+    # section 1 - data
     ratings, movies = load_ratings(data_dir), load_movies(data_dir)
     maps = build_id_maps(ratings, movies)
     ratings = add_indices(ratings, maps)
     log.info("loaded %d ratings, %d users, %d catalogue items",
              len(ratings), maps.n_users, maps.n_items)
 
-    # ---------------------------------------------------------------- 2. split
+    # section 2 - split
+    # train is the %80 of the data,
+    # val is 10% and test is 10%. The split is done by timestamp, so that there is no leakage of future information into the past.
     train, val, test, cut_info = temporal_split(ratings, config.SPLIT_FRACTIONS)
     log.info("temporal split: %s", json.dumps(cut_info))
+    
     stats = eda.run(ratings, maps.n_items, config.POSITIVE_THRESHOLD, out_dir,
                     splits=(train, val, test), cut_info=cut_info)
+    
     log.info("EDA: density=%.4f top20%%items=%.1f%% of ratings",
              stats["density_rated_items"], 100 * stats["top20pct_items_share"])
 
+    
     train_val = pd.concat([train, val])
-    settings = {
-        "val": Setting("val", train, val, maps.n_users, maps.n_items, config.MIN_TRAIN_INTERACTIONS),
-        "test": Setting("test", train_val, test, maps.n_users, maps.n_items,
-                        config.MIN_TRAIN_INTERACTIONS),
-    }
-    for s in settings.values():
-        log.info("[%s] user filtering: %s", s.name, json.dumps(s.drop_stats))
+    
+    # name: (data the model is fitted on, data it is scored on)
+    settings = {"val": (train, val), "test": (train_val, test)}
+
+    for name, (fit_df, target_df) in settings.items():
+        _, drop_stats = eval_users(fit_df, target_df, config.MIN_TRAIN_INTERACTIONS,
+                                   config.POSITIVE_THRESHOLD)
+        log.info("[%s] user filtering: %s", name, json.dumps(drop_stats))
 
     rows = []
 
@@ -105,21 +105,18 @@ def run(data_dir, out_dir):
         log.info("[%s] %-32s %s ±%.4f", setting, model.name, fmt(summary), ci)
 
     # ---------------------------------------------------------------- 3. popularity
-    for name in ("val", "test"):
-        s = settings[name]
+    for name, (fit_df, target_df) in settings.items():
         for m in popularity_models():
-            m.fit(s.fit_df, s.n_users, s.n_items)
-            summary, per_user = s.run(m)
+            m.fit(fit_df, maps.n_users, maps.n_items)
+            summary, per_user = score_model(m, fit_df, target_df, maps)
             record(m, name, summary, per_user)
 
     # ---------------------------------------------------------------- 4. item-kNN tuning
-    s = settings["val"]
     grid = []
     for sim in config.ITEM_KNN_SIM_GRID:
-        S_full = item_similarity(s.fit_df, s.n_users, s.n_items, sim, config.SHRINKAGE)
         for kk in config.ITEM_KNN_K_GRID:
-            m = ItemKNN(kk, sim, config.SHRINKAGE).fit(s.fit_df, s.n_users, s.n_items, sim_full=S_full)
-            summary, per_user = s.run(m)
+            m = ItemKNN(kk, sim).fit(train, maps.n_users, maps.n_items)
+            summary, per_user = score_model(m, train, val, maps)
             record(m, "val", summary, per_user)
             grid.append({"similarity": sim, "k": kk, **summary})
     grid = pd.DataFrame(grid)
@@ -128,11 +125,9 @@ def run(data_dir, out_dir):
     log.info("best item-kNN on validation: similarity=%s k=%d NDCG@10=%.4f",
              best["similarity"], best["k"], best[ndcg])
 
-    s = settings["test"]
-    best_knn = ItemKNN(int(best["k"]), best["similarity"], config.SHRINKAGE).fit(
-        s.fit_df, s.n_users, s.n_items)
+    best_knn = ItemKNN(int(best["k"]), best["similarity"]).fit(train_val, maps.n_users, maps.n_items)
     best_knn.name = "item_knn"
-    summary, per_user = s.run(best_knn)
+    summary, per_user = score_model(best_knn, train_val, test, maps)
     record(best_knn, "test", summary, per_user)
 
     write_results(rows, out_dir / "results.csv", part=1)
@@ -141,13 +136,11 @@ def run(data_dir, out_dir):
     sens = []
     final_models = popularity_models() + [best_knn]
     for m in final_models[:-1]:
-        m.fit(s.fit_df, s.n_users, s.n_items)
+        m.fit(train_val, maps.n_users, maps.n_items)
     for min_train in [config.MIN_TRAIN_INTERACTIONS] + config.SENSITIVITY_MIN_TRAIN:
-        s.set_min_train(min_train)
         for m in final_models:
-            summary, _ = s.run(m)
+            summary, _ = score_model(m, train_val, test, maps, min_train)
             sens.append({"min_train": min_train, "model": m.name, **summary})
-    s.set_min_train(config.MIN_TRAIN_INTERACTIONS)
     sens = pd.DataFrame(sens)
     sens.to_csv(out_dir / "part1_sensitivity.csv", index=False, float_format="%.5f")
     log.info("sensitivity to MIN_TRAIN_INTERACTIONS (test NDCG@10):\n%s",

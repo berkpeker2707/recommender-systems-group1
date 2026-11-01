@@ -9,8 +9,7 @@ run_all.py — the single documented command (brief §4, requirement 1).
 3. Run src.experiments.part1 (loads data, builds the split, runs the baselines).
 4. The experiment writes rows via src.results -> results/results.csv
    in the course template schema; figures go to results/figures/.
-5. src.report rewrites the results section of README.md from those files.
-6. Exit non-zero on any failure, so a broken run is never silently "complete".
+5. Exit non-zero on any failure, so a broken run is never silently "complete".
 """
 import argparse
 import logging
@@ -53,16 +52,11 @@ def main():
         log.error("missing %s in %s — point --data-dir at the unzipped ml-1m folder", missing, data_dir)
         sys.exit(1)
 
-    from src import report
     from src.experiments import part1
     t0 = time.time()
     log.info("===== Part 1 =====")
     part1.run(data_dir, out_dir)
     log.info("Part 1 done in %.1f s", time.time() - t0)
-
-    readme = Path(__file__).parent / "README.md"
-    report.update_readme(readme, out_dir)
-    log.info("results written into %s", readme)
 
 
 if __name__ == "__main__":

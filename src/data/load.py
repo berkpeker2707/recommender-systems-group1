@@ -1,9 +1,11 @@
 """
-load.py — parse the three ml-1m files ("parsing it is part of the work", brief §3).
+load.py — parse the three ml-1m files.
 
 Files use '::' as separator and latin-1 encoding (movie titles contain accents).
   ratings.dat : UserID::MovieID::Rating::Timestamp
   movies.dat  : MovieID::Title (Year)::Genre1|Genre2|...
+
+  Example: 1::1193::5::978300760
 
 Functions:
 - load_ratings(data_dir) -> DataFrame[user, item, rating, timestamp(datetime)]
@@ -21,8 +23,6 @@ ENCODING = "latin-1"
 
 
 def _read_dat(path: Path, columns: list[str]) -> pd.DataFrame:
-    # Split by hand instead of pd.read_csv(sep="::"): a multi-char separator forces the
-    # slow python engine anyway, and titles may contain ':' (but never '::').
     with open(path, encoding=ENCODING) as f:
         rows = [line.rstrip("\n").split("::") for line in f if line.strip()]
     bad = [r for r in rows if len(r) != len(columns)]

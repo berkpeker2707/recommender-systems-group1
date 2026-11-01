@@ -38,8 +38,7 @@ run_all.py
      ├─ setup_logging()     → sets up writing to the screen AND to results/logs/run.log
      ├─ log_environment()   → writes the Python and library versions to the log
      ├─ file check          → do ratings.dat and movies.dat exist? If not, print an error and exit
-     ├─ part1.run(data_dir, out_dir)  → THE REAL WORK STARTS HERE
-     └─ report.update_readme(...)     → writes the results into README.md (step 9)
+     └─ part1.run(data_dir, out_dir)  → THE REAL WORK STARTS HERE
 ```
 
 **Why this way?**
@@ -56,7 +55,7 @@ run_all.py
 
 Each step below covers: **what it does → which file it goes to → what comes back → why.**
 
-### STEP 1 — Read the data ([part1.py:77-81](../src/experiments/part1.py#L77-L81))
+### STEP 1 — Read the data ([part1.py:71-75](../src/experiments/part1.py#L71-L75))
 
 ```python
 ratings, movies = load_ratings(data_dir), load_movies(data_dir)
@@ -100,7 +99,7 @@ ratings = add_indices(ratings, maps)
 
 ---
 
-### STEP 2 — Split by time + describe the data ([part1.py:84-89](../src/experiments/part1.py#L84-L89))
+### STEP 2 — Split by time + describe the data ([part1.py:80-87](../src/experiments/part1.py#L80-L87))
 
 ```python
 train, val, test, cut_info = temporal_split(ratings, config.SPLIT_FRACTIONS)
@@ -131,7 +130,7 @@ always land on the same side. Otherwise we could see one and predict the other, 
 
 ---
 
-### STEP 3 — Set up two "exam settings": `Setting` ([part1.py:40-58](../src/experiments/part1.py#L40-L58), [91-98](../src/experiments/part1.py#L91-L98))
+### STEP 3 — Set up two "exam settings": `settings` and `score_model` ([part1.py:40-46](../src/experiments/part1.py#L40-L46), [92-98](../src/experiments/part1.py#L92-L98))
 
 We have two exam settings:
 
@@ -140,9 +139,9 @@ We have two exam settings:
 | `"val"` | train | val | Choosing settings (tuning) |
 | `"test"` | train + val | test | The final, real result (once) |
 
-We wrote a small class called `Setting` to build both the same way. Creating a `Setting(...)` prepares 3 things:
+The `settings` dictionary holds both pairs. Every time a model is scored, the function `score_model()` prepares 3 things:
 
-1. **`self.csr = to_csr(...)`** → [split.py](../src/split.py) `to_csr()`.
+1. **`seen = to_csr(...)`** → [split.py](../src/split.py) `to_csr()`.
    Builds the user × movie table: 1 if the user rated the movie, 0 if not.
    ```
              Toy Story  Aladdin  Matrix  Titanic ...
@@ -153,7 +152,7 @@ We wrote a small class called `Setting` to build both the same way. Creating a `
    About 95% of the 6040 × 3883 cells are 0, so only the 1s are stored. This is called a "sparse matrix" and it
    saves a lot of memory. During evaluation this table enforces the rule "don't recommend a movie they already watched".
 
-2. **`self.users = eval_users(...)`** → [split.py](../src/split.py) `eval_users()`.
+2. **`users = eval_users(...)`** → [split.py](../src/split.py) `eval_users()`.
    Decides which users take the exam. Removed:
    - users with no ratings in train (new users; we know nothing about them)
    - users with fewer than 5 ratings in train (`MIN_TRAIN_INTERACTIONS = 5`)
@@ -162,24 +161,23 @@ We wrote a small class called `Setting` to build both the same way. Creating a `
    It counts how many users were removed and why in `drop_stats`; those numbers go to the log and the report.
    Result: **1,154** users in test, **490** in val.
 
-3. **`self.gt = ground_truth(...)`** → [split.py](../src/split.py) `ground_truth()`.
+3. **`gt = ground_truth(...)`** → [split.py](../src/split.py) `ground_truth()`.
    The "answer key": for each user, the movies they rated 4 or 5 during the exam period.
    ```python
    {0: {12, 340, 2001}, 1: {5, 77}, ...}
    ```
 
-`Setting.run(model)` is essentially one call: it hands the model to `evaluate()` (explained in step 4).
+`score_model()` then hands these and the model to `evaluate()` (explained in step 4).
 
 ---
 
-### STEP 4 — The Most Popular models ([part1.py:108-113](../src/experiments/part1.py#L108-L113))
+### STEP 4 — The Most Popular models ([part1.py:108-112](../src/experiments/part1.py#L108-L112))
 
 ```python
-for name in ("val", "test"):
-    s = settings[name]
+for name, (fit_df, target_df) in settings.items():
     for m in popularity_models():        # 3 variants
-        m.fit(s.fit_df, ...)             # train
-        summary, per_user = s.run(m)     # test
+        m.fit(fit_df, ...)               # train
+        summary, per_user = score_model(m, fit_df, target_df, maps)  # test
         record(m, name, summary, per_user)  # save the result
 ```
 
@@ -198,7 +196,7 @@ The 3 variants use the same code with different settings ([config.py](../config.
 
 `score()` gives everyone **the same scores**; there is no personalisation.
 
-#### 4b. `s.run(m)` → `evaluate()` → [src/evaluation/evaluator.py](../src/evaluation/evaluator.py)
+#### 4b. `score_model()` → `evaluate()` → [src/evaluation/evaluator.py](../src/evaluation/evaluator.py)
 This function is the heart of the project. **Every model is evaluated by the same function**, which keeps the comparison fair.
 
 ```
@@ -238,20 +236,18 @@ so the results come out exactly the same on every run.
 
 ---
 
-### STEP 5 — Item-kNN tuning ([part1.py:116-129](../src/experiments/part1.py#L116-L129))
+### STEP 5 — Item-kNN tuning ([part1.py:115-126](../src/experiments/part1.py#L115-L126))
 
 ```python
 for sim in ["cosine", "jaccard", "adjusted_cosine"]:
-    S_full = item_similarity(...)                 # compute the similarity table once
     for kk in [10, 20, 50, 100, 200]:
-        m = ItemKNN(kk, sim).fit(..., sim_full=S_full)
-        summary, per_user = s.run(m)              # s = the "val" setting
+        m = ItemKNN(kk, sim).fit(train, ...)
+        summary, per_user = score_model(m, train, val, maps)
         grid.append(...)
 best = grid.loc[grid[ndcg].idxmax()]              # pick the highest NDCG
 ```
 
-3 similarities × 5 values of k = **15 trials**, all on **validation**. The similarity table is computed once per `sim`
-and reused for the 5 values of `k`. The results are the same, but it runs much faster.
+3 similarities × 5 values of k = **15 trials**, all on **validation**.
 
 #### How does item-kNN work? → [src/models/item_knn.py](../src/models/item_knn.py)
 
@@ -287,19 +283,18 @@ This score table goes to `evaluate()`, and from there on everything is **exactly
 
 ---
 
-### STEP 6 — Test the winner ([part1.py:131-136](../src/experiments/part1.py#L131-L136))
+### STEP 6 — Test the winner ([part1.py:128-131](../src/experiments/part1.py#L128-L131))
 
 ```python
-s = settings["test"]
-best_knn = ItemKNN(50, "adjusted_cosine").fit(train + val)
-summary, per_user = s.run(best_knn)
+best_knn = ItemKNN(50, "adjusted_cosine").fit(train_val, ...)
+summary, per_user = score_model(best_knn, train_val, test, maps)
 ```
 The winning setting is retrained on **train + val** (more data, and more recent) and goes into the test
 **once**. Looking at the test results and changing the settings is forbidden.
 
 ---
 
-### STEP 7 — Write the results ([part1.py:138](../src/experiments/part1.py#L138))
+### STEP 7 — Write the results ([part1.py:133](../src/experiments/part1.py#L133))
 
 `write_results()` → [results.py](../src/results.py): writes the rows in the `rows` list to `results/results.csv`.
 If the file has rows from other parts it leaves them alone and replaces only the Part 1 rows.
@@ -308,21 +303,19 @@ If the file has rows from other parts it leaves them alone and replaces only the
 
 ---
 
-### STEP 8 — Sensitivity check ([part1.py:141-154](../src/experiments/part1.py#L141-L154))
+### STEP 8 — Sensitivity check ([part1.py:136-147](../src/experiments/part1.py#L136-L147))
 
 The question: would the results change if we chose 1 or 20 instead of the "5 ratings" threshold?
-- The models are **not retrained.** Only the list of users taking the exam changes, through
-  `s.set_min_train(1)` and `s.set_min_train(20)`, and they are evaluated again.
+- The models are **not retrained.** Only the list of users taking the exam changes, because
+  `score_model()` is called again with `min_train` set to 1 and 20.
 - The result is written to `results/part1_sensitivity.csv`.
 - Finding: a threshold of 20 lowers the popularity scores by about 0.005. That is very close to the gap between kNN and popularity (≈0.007). The report must say this honestly.
 
 ---
 
-### STEP 9 — Figures and README ([part1.py:157](../src/experiments/part1.py#L157), [run_all.py](../run_all.py))
+### STEP 9 — Figures ([part1.py:150](../src/experiments/part1.py#L150))
 
 - `plots.run()` → [src/plots.py](../src/plots.py): draws `results_test.png`, `knn_tuning.png` and `sensitivity.png`.
-- `report.update_readme()` → [src/report.py](../src/report.py): reads the files in `results/` and rewrites the part of
-  [README.md](../README.md) between `<!-- RESULTS:START -->` and `<!-- RESULTS:END -->`. Text outside those markers is never touched.
 
 ---
 
@@ -336,23 +329,21 @@ run_all.py  main()
 │  │                           build_id_maps, add_indices
 │  ├─ src/split.py             temporal_split
 │  ├─ src/eda.py               run → dataset_stats, split_stats, plot_all (+ top_share)
-│  ├─ part1.Setting  ×2        __init__ → split.to_csr
-│  │                                    → set_min_train → split.eval_users, split.ground_truth
 │  ├─ POPULARITY (val + test, 3 variants)
 │  │   ├─ src/models/popularity.py   MostPopular.fit
-│  │   └─ Setting.run → src/evaluation/evaluator.py evaluate
+│  │   └─ score_model → split.eval_users, split.ground_truth, split.to_csr
+│  │                  → src/evaluation/evaluator.py evaluate
 │  │                      ├─ top_k → MostPopular.score
 │  │                      └─ src/evaluation/metrics.py  precision/recall/ndcg_at_k, catalogue_coverage
 │  │      record → src/evaluation/stats.py mean_ci, src/results.py make_row
 │  ├─ ITEM-kNN TUNING (val, 15 trials)
-│  │   ├─ src/models/item_knn.py   item_similarity → split.to_csr
-│  │   │                           ItemKNN.fit → keep_top_k
-│  │   └─ Setting.run → evaluate → top_k → ItemKNN.score → metrics…
-│  ├─ ITEM-kNN TEST (once)         ItemKNN.fit, Setting.run
+│  │   ├─ src/models/item_knn.py   ItemKNN.fit → item_similarity → split.to_csr
+│  │   │                                       → keep_top_k
+│  │   └─ score_model → evaluate → top_k → ItemKNN.score → metrics…
+│  ├─ ITEM-kNN TEST (once)         ItemKNN.fit, score_model
 │  ├─ src/results.py               write_results → results/results.csv
-│  ├─ SENSITIVITY                  Setting.set_min_train(1/20) + Setting.run
+│  ├─ SENSITIVITY                  score_model with min_train = 5, 1, 20
 │  └─ src/plots.py                 run → plot_test_results, plot_knn_tuning, plot_sensitivity
-└─ src/report.py  update_readme → build_markdown → README.md
 ```
 
 ---
@@ -382,13 +373,12 @@ That means:
 | `results/part1_item_knn_grid.csv` | `part1.run` step 5 | All 15 tuning trials |
 | `results/part1_sensitivity.csv` | `part1.run` step 8 | Comparison of thresholds 1/5/20 |
 | `results/logs/run.log` | `run_all.setup_logging` | Everything you see on the screen |
-| `README.md` (results section) | `report.update_readme` | Tables and figures from the files above |
 
 ---
 
 ## 6. To understand it yourself
 
-1. **Walk through it with the debugger:** put a breakpoint on [part1.py:85](../src/experiments/part1.py#L85), press F5,
+1. **Walk through it with the debugger:** put a breakpoint on [part1.py:81](../src/experiments/part1.py#L81), press F5,
    and type `train.head()` and `cut_info` in the Debug Console. Then step forward with F10.
 2. **Run the tests:** `python -m pytest tests -q` → shows that NDCG gives the same result as the example on the lecture slide.
 3. **Change something and see what happens:** set `ITEM_KNN_K_GRID = [5, 50]` in [config.py](../config.py), run again, and see how the grid file changed.
