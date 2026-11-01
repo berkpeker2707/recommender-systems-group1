@@ -1,11 +1,8 @@
 """
-results.py — write metrics in EXACTLY the course results template schema (brief §4 req. 4).
+results.py — write results/results.csv, the machine-readable copy of the course results workbook.
 
-TODO: the column names below are PROVISIONAL. Copy them verbatim from the downloaded
-course template — do not rename, drop or reinterpret any field — and only change
-COLUMNS + row construction here. One row per (model, configuration, split, seed, ...)
-as the template defines. Results go to results/results.csv; the same numbers are
-pasted into the report and committed to GitHub.
+Column names match the "Part 1 - Baselines" tab of the workbook (brief §4 req. 4).
+Part, Split, the CI and Users evaluated are extra columns, which the workbook allows.
 """
 import json
 from pathlib import Path
@@ -13,18 +10,22 @@ from pathlib import Path
 import pandas as pd
 
 COLUMNS = [
-    "part", "model", "config", "split", "seed", "n_users",
-    "precision@10", "recall@10", "ndcg@10", "ndcg@10_ci95", "coverage@10",
+    "Part", "Split", "Model", "Variant / settings", "Similarity", "k",
+    "Precision@10", "Recall@10", "NDCG@10", "NDCG@10 95% CI (+/-)", "Catalogue coverage",
+    "Seed", "Users evaluated",
 ]
 
 
 def make_row(part: int, model, split: str, seed: int, summary: dict, ndcg_ci: float) -> dict:
+    params = model.params()
     return {
-        "part": part, "model": model.name, "config": json.dumps(model.params(), sort_keys=True),
-        "split": split, "seed": seed, "n_users": summary["n_users"],
-        "precision@10": summary["precision@10"], "recall@10": summary["recall@10"],
-        "ndcg@10": summary["ndcg@10"], "ndcg@10_ci95": ndcg_ci,
-        "coverage@10": summary["coverage@10"],
+        "Part": part, "Split": split, "Model": model.name,
+        "Variant / settings": json.dumps(params, sort_keys=True),
+        "Similarity": params.get("similarity", ""), "k": params.get("k", ""),
+        "Precision@10": summary["precision@10"], "Recall@10": summary["recall@10"],
+        "NDCG@10": summary["ndcg@10"], "NDCG@10 95% CI (+/-)": ndcg_ci,
+        "Catalogue coverage": summary["coverage@10"],
+        "Seed": seed, "Users evaluated": summary["n_users"],
     }
 
 
@@ -33,5 +34,5 @@ def write_results(rows: list, path: Path, part: int):
     # Part 2-3: uncomment to keep the rows of the other parts in results.csv
     # if path.exists():
     #     old = pd.read_csv(path)
-    #     new = pd.concat([old[old["part"] != part], new], ignore_index=True)
+    #     new = pd.concat([old[old["Part"] != part], new], ignore_index=True)
     new.to_csv(path, index=False, float_format="%.5f")

@@ -6,7 +6,7 @@
 
 Part 1: data characterisation, temporal evaluation protocol and two baselines (Most Popular,
 item-based kNN) on MovieLens 1M.
-Report: <link to report PDF / Overleaf> · Team: <name 1>, <name 2>, <name 3>
+Report and results workbook: `results/(Group 1) Recommender_Systems_*` · Team: Farzana, Berk Peker, Emil
 
 ## Results (Part 1)
 _Numbers from `python run_all.py`; update this section by hand if the results change._

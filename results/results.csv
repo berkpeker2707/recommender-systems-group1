@@ -1,23 +1,23 @@
-part,model,config,split,seed,n_users,precision@10,recall@10,ndcg@10,ndcg@10_ci95,coverage@10
-1,pop_alltime_count,"{""positives_only"": false, ""window_days"": null}",val,42,490,0.10347,0.04418,0.11701,0.01771,0.03348
-1,pop_alltime_positive,"{""positives_only"": true, ""window_days"": null}",val,42,490,0.11204,0.04759,0.12432,0.01803,0.03116
-1,pop_recent90_count,"{""positives_only"": false, ""window_days"": 90}",val,42,490,0.10408,0.05243,0.11659,0.01704,0.03013
-1,pop_alltime_count,"{""positives_only"": false, ""window_days"": null}",test,42,1154,0.18510,0.05166,0.20031,0.01403,0.03786
-1,pop_alltime_positive,"{""positives_only"": true, ""window_days"": null}",test,42,1154,0.19454,0.05660,0.21195,0.01439,0.03631
-1,pop_recent90_count,"{""positives_only"": false, ""window_days"": 90}",test,42,1154,0.18726,0.05354,0.20178,0.01412,0.03219
-1,item_knn_cosine_k10,"{""k"": 10, ""shrinkage"": 0, ""similarity"": ""cosine""}",val,42,490,0.07959,0.05445,0.09374,0.01426,0.17100
-1,item_knn_cosine_k20,"{""k"": 20, ""shrinkage"": 0, ""similarity"": ""cosine""}",val,42,490,0.07408,0.04536,0.09050,0.01493,0.17332
-1,item_knn_cosine_k50,"{""k"": 50, ""shrinkage"": 0, ""similarity"": ""cosine""}",val,42,490,0.07898,0.04347,0.09208,0.01517,0.17177
-1,item_knn_cosine_k100,"{""k"": 100, ""shrinkage"": 0, ""similarity"": ""cosine""}",val,42,490,0.08224,0.04922,0.09650,0.01495,0.16199
-1,item_knn_cosine_k200,"{""k"": 200, ""shrinkage"": 0, ""similarity"": ""cosine""}",val,42,490,0.09061,0.04652,0.10122,0.01574,0.14757
-1,item_knn_jaccard_k10,"{""k"": 10, ""shrinkage"": 0, ""similarity"": ""jaccard""}",val,42,490,0.08551,0.05629,0.10371,0.01570,0.14190
-1,item_knn_jaccard_k20,"{""k"": 20, ""shrinkage"": 0, ""similarity"": ""jaccard""}",val,42,490,0.08551,0.05146,0.10139,0.01594,0.13958
-1,item_knn_jaccard_k50,"{""k"": 50, ""shrinkage"": 0, ""similarity"": ""jaccard""}",val,42,490,0.08755,0.04269,0.09836,0.01579,0.13598
-1,item_knn_jaccard_k100,"{""k"": 100, ""shrinkage"": 0, ""similarity"": ""jaccard""}",val,42,490,0.09020,0.04690,0.10301,0.01588,0.12516
-1,item_knn_jaccard_k200,"{""k"": 200, ""shrinkage"": 0, ""similarity"": ""jaccard""}",val,42,490,0.09449,0.04451,0.10576,0.01641,0.11409
-1,item_knn_adjusted_cosine_k10,"{""k"": 10, ""shrinkage"": 0, ""similarity"": ""adjusted_cosine""}",val,42,490,0.09449,0.05959,0.11606,0.01682,0.13160
-1,item_knn_adjusted_cosine_k20,"{""k"": 20, ""shrinkage"": 0, ""similarity"": ""adjusted_cosine""}",val,42,490,0.09571,0.05401,0.11367,0.01688,0.11821
-1,item_knn_adjusted_cosine_k50,"{""k"": 50, ""shrinkage"": 0, ""similarity"": ""adjusted_cosine""}",val,42,490,0.10735,0.05897,0.12664,0.01784,0.10301
-1,item_knn_adjusted_cosine_k100,"{""k"": 100, ""shrinkage"": 0, ""similarity"": ""adjusted_cosine""}",val,42,490,0.11163,0.06031,0.12490,0.01764,0.09451
-1,item_knn_adjusted_cosine_k200,"{""k"": 200, ""shrinkage"": 0, ""similarity"": ""adjusted_cosine""}",val,42,490,0.11163,0.05722,0.12601,0.01834,0.08705
-1,item_knn,"{""k"": 50, ""shrinkage"": 0, ""similarity"": ""adjusted_cosine""}",test,42,1154,0.20043,0.06503,0.21851,0.01405,0.14293
+Part,Split,Model,Variant / settings,Similarity,k,Precision@10,Recall@10,NDCG@10,NDCG@10 95% CI (+/-),Catalogue coverage,Seed,Users evaluated
+1,val,pop_alltime_count,"{""positives_only"": false, ""window_days"": null}",,,0.10347,0.04418,0.11701,0.01771,0.03348,42,490
+1,val,pop_alltime_positive,"{""positives_only"": true, ""window_days"": null}",,,0.11204,0.04759,0.12432,0.01803,0.03116,42,490
+1,val,pop_recent90_count,"{""positives_only"": false, ""window_days"": 90}",,,0.10408,0.05243,0.11659,0.01704,0.03013,42,490
+1,test,pop_alltime_count,"{""positives_only"": false, ""window_days"": null}",,,0.18510,0.05166,0.20031,0.01403,0.03786,42,1154
+1,test,pop_alltime_positive,"{""positives_only"": true, ""window_days"": null}",,,0.19454,0.05660,0.21195,0.01439,0.03631,42,1154
+1,test,pop_recent90_count,"{""positives_only"": false, ""window_days"": 90}",,,0.18726,0.05354,0.20178,0.01412,0.03219,42,1154
+1,val,item_knn_cosine_k10,"{""k"": 10, ""similarity"": ""cosine""}",cosine,10,0.07959,0.05445,0.09374,0.01426,0.17100,42,490
+1,val,item_knn_cosine_k20,"{""k"": 20, ""similarity"": ""cosine""}",cosine,20,0.07408,0.04536,0.09050,0.01493,0.17332,42,490
+1,val,item_knn_cosine_k50,"{""k"": 50, ""similarity"": ""cosine""}",cosine,50,0.07898,0.04347,0.09208,0.01517,0.17177,42,490
+1,val,item_knn_cosine_k100,"{""k"": 100, ""similarity"": ""cosine""}",cosine,100,0.08224,0.04922,0.09650,0.01495,0.16199,42,490
+1,val,item_knn_cosine_k200,"{""k"": 200, ""similarity"": ""cosine""}",cosine,200,0.09061,0.04652,0.10122,0.01574,0.14757,42,490
+1,val,item_knn_jaccard_k10,"{""k"": 10, ""similarity"": ""jaccard""}",jaccard,10,0.08551,0.05629,0.10371,0.01570,0.14190,42,490
+1,val,item_knn_jaccard_k20,"{""k"": 20, ""similarity"": ""jaccard""}",jaccard,20,0.08551,0.05146,0.10139,0.01594,0.13958,42,490
+1,val,item_knn_jaccard_k50,"{""k"": 50, ""similarity"": ""jaccard""}",jaccard,50,0.08755,0.04269,0.09836,0.01579,0.13598,42,490
+1,val,item_knn_jaccard_k100,"{""k"": 100, ""similarity"": ""jaccard""}",jaccard,100,0.09020,0.04690,0.10301,0.01588,0.12516,42,490
+1,val,item_knn_jaccard_k200,"{""k"": 200, ""similarity"": ""jaccard""}",jaccard,200,0.09449,0.04451,0.10576,0.01641,0.11409,42,490
+1,val,item_knn_adjusted_cosine_k10,"{""k"": 10, ""similarity"": ""adjusted_cosine""}",adjusted_cosine,10,0.09449,0.05959,0.11606,0.01682,0.13160,42,490
+1,val,item_knn_adjusted_cosine_k20,"{""k"": 20, ""similarity"": ""adjusted_cosine""}",adjusted_cosine,20,0.09571,0.05401,0.11367,0.01688,0.11821,42,490
+1,val,item_knn_adjusted_cosine_k50,"{""k"": 50, ""similarity"": ""adjusted_cosine""}",adjusted_cosine,50,0.10735,0.05897,0.12664,0.01784,0.10301,42,490
+1,val,item_knn_adjusted_cosine_k100,"{""k"": 100, ""similarity"": ""adjusted_cosine""}",adjusted_cosine,100,0.11163,0.06031,0.12490,0.01764,0.09451,42,490
+1,val,item_knn_adjusted_cosine_k200,"{""k"": 200, ""similarity"": ""adjusted_cosine""}",adjusted_cosine,200,0.11163,0.05722,0.12601,0.01834,0.08705,42,490
+1,test,item_knn,"{""k"": 50, ""similarity"": ""adjusted_cosine""}",adjusted_cosine,50,0.20043,0.06503,0.21851,0.01405,0.14293,42,1154

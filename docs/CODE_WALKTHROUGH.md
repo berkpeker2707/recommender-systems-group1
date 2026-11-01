@@ -296,7 +296,7 @@ The winning setting is retrained on **train + val** (more data, and more recent)
 `write_results()` → [results.py](../src/results.py): writes the rows in the `rows` list to `results/results.csv`.
 The code that keeps rows from other parts is commented out until Part 2.
 
-> ⚠️ The column names are provisional for now. Once we have the course's official template, the `COLUMNS` list must be changed to match it exactly.
+> The column names match the "Part 1 - Baselines" tab of the course workbook. The workbook is filled by hand from this file, so update it if the numbers change.
 
 ---
 

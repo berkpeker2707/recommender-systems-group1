@@ -63,7 +63,7 @@ justify every decision from the lectures.
 
 **What we did:**
 - 80% of ratings go to train, 10% to validation, 10% to test. We placed the cuts by **number of ratings**, not at fixed calendar dates.
-  The reason: most ratings were given in 2000, so cutting at "the start of 2001" would leave a very small test set.
+  The reason: cutting by count gives validation and test the same size, even though most ratings were given in 2000.
 - Cut dates: **2 December 2000** (train | validation) and **29 December 2000** (validation | test).
 - Filter: we only evaluate users with **at least 5 ratings in the training data** and **at least one movie rated 4–5 in the evaluated period**.
   **We did not filter movies at all**, because we rank over the full catalogue.
@@ -88,7 +88,7 @@ justify every decision from the lectures.
 **Where the result is:** The cut dates and split sizes are in `results/eda_stats.json` (`split_cuts`, `split`) and in the
 "2. Temporal split" section of the README. The rows removed by the filter are currently **only** in `results/logs/run.log` (the "user filtering" lines).
 
-**For the report:** *"We split globally by time at the 80% and 90% interaction quantiles (2 Dec 2000 and 29 Dec 2000), because a random split lets the model train on the future (L3.1 s4); we cut by interaction count rather than calendar date because about 90% of ratings fall in 2000. We evaluate only users with ≥ 5 training ratings and ≥ 1 relevant test item (removing 55 of 1,209 test users, 4.5% of test rows); items are not filtered."*
+**For the report:** *"We split globally by time at the 80% and 90% interaction quantiles (2 Dec 2000 and 29 Dec 2000), because a random split lets the model train on the future (L3.1 s4); we cut by interaction count rather than calendar date so that validation and test have equal size. We evaluate only users with ≥ 5 training ratings and ≥ 1 relevant test item (removing 55 of 1,209 test users, 4.5% of test rows); items are not filtered."*
 
 ---
 
@@ -201,9 +201,9 @@ All of these decisions are in [config.py](../config.py) with comments. Summary t
 
 | To submit | Status |
 |---|---|
-| GitHub link | ❌ Not submitted yet; the repository URL must go into the report |
-| Results, in the official template | ⚠️ `results/results.csv` is produced, but the column names are **provisional**. Download the official template and make `COLUMNS` in [results.py](../src/results.py) match it exactly |
-| Report (maximum 4 pages) | ❌ Not started. The "For the report" sentences in this file can serve as drafts |
+| GitHub link | ⚠️ In the report and the workbook; not submitted yet |
+| Results, in the official template | ⚠️ Part 1 tab of `results/(Group 1) Recommender_Systems_Results_Template.xlsm` is filled from `results/results.csv`; it must be uploaded as a Google Sheet and shared with the staff |
+| Report (maximum 4 pages) | ⚠️ Draft in `results/(Group 1) Recommender_Systems_Report_Template.docx`; the team must complete the yellow items and check the page count in Word |
 | Reproducing with one command | ✅ `python run_all.py --data-dir data/ml-1m` ([run_all.py](../run_all.py)) |
 
 ---
