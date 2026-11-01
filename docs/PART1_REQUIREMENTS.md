@@ -113,7 +113,7 @@ justify every decision from the lectures.
 - The loop over the 15 trials and picking the winner: [part1.py:115-129](../src/experiments/part1.py#L115-L129)
 - Testing the winner: [part1.py:131-136](../src/experiments/part1.py#L131-L136)
 
-**Where the result is:** `results/part1_item_knn_grid.csv`, `results/figures/knn_tuning.png` and the "4. Item-kNN tuning" section of the README.
+**Where the result is:** `results/part1_item_knn_grid.csv` and the "4. Item-kNN tuning" section of the README.
 
 **For the report:** *"We tuned k ∈ {10, 20, 50, 100, 200} and the similarity (cosine, Jaccard, adjusted cosine) on validation NDCG@10 (L1.2 s10); adjusted cosine with k = 50 was best and was refit on train+validation before a single test run."*
 
@@ -170,7 +170,7 @@ To show the metrics are calculated correctly, we wrote the example from Lecture 
 - "A hit" = 4–5 stars: [config.py:19](../config.py#L19) `POSITIVE_THRESHOLD`, [split.py:71](../src/split.py#L71) `ground_truth()`
 - The slide 8 test: [tests/test_metrics.py](../tests/test_metrics.py). To run it: `python -m pytest tests -q`
 
-**Where the result is:** `results/results.csv`, the plot `results/figures/results_test.png` and the "3. Baselines on the test set" section of the README.
+**Where the result is:** `results/results.csv` and the "3. Baselines on the test set" section of the README.
 
 ---
 
@@ -215,4 +215,4 @@ The brief also asks these questions:
 - **What does the burstiness of the timestamps do to the split?** → Validation is shorter than a month, and 611 of its 1,134 users are not in train at all. Numbers: [eda.py:68](../src/eda.py#L68) `split_stats()`
 - **Did the filtering threshold change the results by more than the gap between the baselines?** → About the same size.
   With a threshold of 20, popularity changes by ≈0.005; the gap between kNN and popularity is ≈0.007.
-  Code: [part1.py:140-154](../src/experiments/part1.py#L140-L154). Result: `results/part1_sensitivity.csv`, `results/figures/sensitivity.png`.
+  Code: [part1.py:140-154](../src/experiments/part1.py#L140-L154). Result: `results/part1_sensitivity.csv`.

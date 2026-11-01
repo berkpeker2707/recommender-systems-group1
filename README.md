@@ -43,12 +43,8 @@ _Numbers from `python run_all.py`; update this section by hand if the results ch
 | Popular (4–5 stars only) | 0.195 | 0.057 | 0.212 ± 0.014 | 3.6% |
 | Item-kNN | 0.200 | 0.065 | 0.219 ± 0.014 | 14.3% |
 
-![test results](results/figures/results_test.png)
-
 ### 4. Item-kNN tuning (validation)
 Chosen: **adjusted cosine, k = 50** (validation NDCG@10 = 0.127).
-
-![item-kNN tuning](results/figures/knn_tuning.png)
 
 <details><summary>All tuning runs</summary>
 
@@ -79,9 +75,6 @@ Chosen: **adjusted cosine, k = 50** (validation NDCG@10 = 0.127).
 | Popular (all ratings) | 0.2008 | 0.2003 | 0.1966 |
 | Popular (4–5 stars only) | 0.2121 | 0.2119 | 0.2067 |
 | Popular (last 90 days) | 0.2022 | 0.2018 | 0.1983 |
-
-![sensitivity](results/figures/sensitivity.png)
-
 ## 1. Requirements
 
 - Python 3.11.17
@@ -121,9 +114,8 @@ run_all.py               single entry point
 config.py                every tunable constant (seed, split, thresholds, grids)
 src/data/load.py         parse ml-1m (:: separated)
 src/eda.py               dataset characterisation + plots
-src/plots.py             result figures (model comparison, tuning, sensitivity)
 src/split.py             temporal train/val/test + user filtering
-src/models/              Most Popular, item-kNN (common Recommender interface in base.py)
+src/models/              Most Popular, item-kNN (base.py is commented out until Part 2)
 src/evaluation/          metrics, full-catalogue evaluator, confidence intervals
 src/experiments/part1.py runs the whole Part 1 pipeline
 src/results.py           writes results in the mandatory template schema
@@ -143,9 +135,6 @@ docs/                    plan, code walkthrough, team split
 | Table: item-kNN tuning grid (validation)       | results/part1_item_knn_grid.csv                          | src/experiments/part1.py |
 | Table: Part 1 baselines                        | results/results.csv                                      | src/experiments/part1.py |
 | Table: sensitivity to user filtering           | results/part1_sensitivity.csv                            | src/experiments/part1.py |
-| Fig: test NDCG@10 ± CI and coverage per model  | results/figures/results_test.png                         | src/plots.py             |
-| Fig: item-kNN tuning (validation NDCG@10 vs k) | results/figures/knn_tuning.png                           | src/plots.py             |
-| Fig: sensitivity to user filtering             | results/figures/sensitivity.png                          | src/plots.py             |
 
 ## 7. Use of AI assistants
 

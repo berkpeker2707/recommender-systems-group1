@@ -36,7 +36,6 @@ run_all.py
  └─ main()
      ├─ argparse            → reads "--data-dir data/ml-1m"
      ├─ setup_logging()     → sets up writing to the screen AND to results/logs/run.log
-     ├─ log_environment()   → writes the Python and library versions to the log
      ├─ file check          → do ratings.dat and movies.dat exist? If not, print an error and exit
      └─ part1.run(data_dir, out_dir)  → THE REAL WORK STARTS HERE
 ```
@@ -44,7 +43,6 @@ run_all.py
 **Why this way?**
 - The brief says everything must be reproducible with one command, so there is one entry point.
 - The data path comes from the command line and is not written into the code (the teacher will use a different folder on their computer).
-- Writing the versions to the log is the proof of which environment produced these numbers.
 
 > Where are the settings? All fixed values (threshold 4, the k list, 80/10/10…) are in [config.py](../config.py).
 > When you see something like `config.TOP_K` in the code, look there. The rule: the teacher should never have to edit source code.
@@ -55,7 +53,7 @@ run_all.py
 
 Each step below covers: **what it does → which file it goes to → what comes back → why.**
 
-### STEP 1 — Read the data ([part1.py:71-75](../src/experiments/part1.py#L71-L75))
+### STEP 1 — Read the data ([part1.py:70-74](../src/experiments/part1.py#L70-L74))
 
 ```python
 ratings, movies = load_ratings(data_dir), load_movies(data_dir)
@@ -77,8 +75,8 @@ ratings = add_indices(ratings, maps)
 
    `ts` is the time in seconds (Unix time). `timestamp` is the same moment as a readable date.
 
-2. `load_movies()` does the same for `movies.dat`. It also extracts the year from the title (`"Toy Story (1995)"` → 1995)
-   and the genres (`"Animation|Comedy"` → `["Animation", "Comedy"]`). Here we only need it for the number of movies (3,883).
+2. `load_movies()` does the same for `movies.dat`. Here we only need it for the number of movies (3,883).
+   The lines that extract the year and the genre list are commented out until Parts 2–3 need them.
 
 3. `build_id_maps()` + `add_indices()` — **the most confusing step, but a simple one.**
    Movie IDs run from 1 to 3952, but with gaps (3,883 movies in total).
@@ -99,7 +97,7 @@ ratings = add_indices(ratings, maps)
 
 ---
 
-### STEP 2 — Split by time + describe the data ([part1.py:80-87](../src/experiments/part1.py#L80-L87))
+### STEP 2 — Split by time + describe the data ([part1.py:79-86](../src/experiments/part1.py#L79-L86))
 
 ```python
 train, val, test, cut_info = temporal_split(ratings, config.SPLIT_FRACTIONS)
@@ -130,7 +128,7 @@ always land on the same side. Otherwise we could see one and predict the other, 
 
 ---
 
-### STEP 3 — Set up two "exam settings": `settings` and `score_model` ([part1.py:40-46](../src/experiments/part1.py#L40-L46), [92-98](../src/experiments/part1.py#L92-L98))
+### STEP 3 — Set up two "exam settings": `settings` and `score_model` ([part1.py:40-45](../src/experiments/part1.py#L40-L45), [91-97](../src/experiments/part1.py#L91-L97))
 
 We have two exam settings:
 
@@ -171,7 +169,7 @@ The `settings` dictionary holds both pairs. Every time a model is scored, the fu
 
 ---
 
-### STEP 4 — The Most Popular models ([part1.py:108-112](../src/experiments/part1.py#L108-L112))
+### STEP 4 — The Most Popular models ([part1.py:107-111](../src/experiments/part1.py#L107-L111))
 
 ```python
 for name, (fit_df, target_df) in settings.items():
@@ -221,22 +219,21 @@ sort         → Titanic, Aladdin, ...  (first 10)
 answer key {Titanic, Fargo}  → a hit in position 1!
 ```
 
-`top_k` processes users in groups of 1,024. Processing them all at once would take too much memory for
-the 6040 × 3883 table. `kind="stable"` gives the same order every time when two movies have equal scores,
+`kind="stable"` gives the same order every time when two movies have equal scores,
 so the results come out exactly the same on every run.
 
 **What comes back:**
 - `summary` → the averages: `{"precision@10": 0.195, "ndcg@10": 0.212, "coverage@10": 0.036, "n_users": 1154}`
 - `per_user` → **each user's individual score** (needed for the confidence interval)
 
-#### 4c. `record()` → [part1.py:102-105](../src/experiments/part1.py#L102-L105)
+#### 4c. `record()` → [part1.py:101-104](../src/experiments/part1.py#L101-L104)
 - `mean_ci()` → [src/evaluation/stats.py](../src/evaluation/stats.py): computes the ± confidence interval from the user scores
 - `make_row()` → [src/results.py](../src/results.py): turns the result into a table row and adds it to the `rows` list
 - writes a line to the log
 
 ---
 
-### STEP 5 — Item-kNN tuning ([part1.py:115-126](../src/experiments/part1.py#L115-L126))
+### STEP 5 — Item-kNN tuning ([part1.py:114-125](../src/experiments/part1.py#L114-L125))
 
 ```python
 for sim in ["cosine", "jaccard", "adjusted_cosine"]:
@@ -283,7 +280,7 @@ This score table goes to `evaluate()`, and from there on everything is **exactly
 
 ---
 
-### STEP 6 — Test the winner ([part1.py:128-131](../src/experiments/part1.py#L128-L131))
+### STEP 6 — Test the winner ([part1.py:127-130](../src/experiments/part1.py#L127-L130))
 
 ```python
 best_knn = ItemKNN(50, "adjusted_cosine").fit(train_val, ...)
@@ -294,28 +291,22 @@ The winning setting is retrained on **train + val** (more data, and more recent)
 
 ---
 
-### STEP 7 — Write the results ([part1.py:133](../src/experiments/part1.py#L133))
+### STEP 7 — Write the results ([part1.py:132](../src/experiments/part1.py#L132))
 
 `write_results()` → [results.py](../src/results.py): writes the rows in the `rows` list to `results/results.csv`.
-If the file has rows from other parts it leaves them alone and replaces only the Part 1 rows.
+The code that keeps rows from other parts is commented out until Part 2.
 
 > ⚠️ The column names are provisional for now. Once we have the course's official template, the `COLUMNS` list must be changed to match it exactly.
 
 ---
 
-### STEP 8 — Sensitivity check ([part1.py:136-147](../src/experiments/part1.py#L136-L147))
+### STEP 8 — Sensitivity check ([part1.py:135-146](../src/experiments/part1.py#L135-L146))
 
 The question: would the results change if we chose 1 or 20 instead of the "5 ratings" threshold?
 - The models are **not retrained.** Only the list of users taking the exam changes, because
   `score_model()` is called again with `min_train` set to 1 and 20.
 - The result is written to `results/part1_sensitivity.csv`.
 - Finding: a threshold of 20 lowers the popularity scores by about 0.005. That is very close to the gap between kNN and popularity (≈0.007). The report must say this honestly.
-
----
-
-### STEP 9 — Figures ([part1.py:150](../src/experiments/part1.py#L150))
-
-- `plots.run()` → [src/plots.py](../src/plots.py): draws `results_test.png`, `knn_tuning.png` and `sensitivity.png`.
 
 ---
 
@@ -342,16 +333,14 @@ run_all.py  main()
 │  │   └─ score_model → evaluate → top_k → ItemKNN.score → metrics…
 │  ├─ ITEM-kNN TEST (once)         ItemKNN.fit, score_model
 │  ├─ src/results.py               write_results → results/results.csv
-│  ├─ SENSITIVITY                  score_model with min_train = 5, 1, 20
-│  └─ src/plots.py                 run → plot_test_results, plot_knn_tuning, plot_sensitivity
+│  └─ SENSITIVITY                  score_model with min_train = 5, 1, 20
 ```
 
 ---
 
 ## 4. The one important design trick: everyone uses the same "plug"
 
-The `Recommender` class in [src/models/base.py](../src/models/base.py) works like a contract.
-Every model **must be able to do two things**:
+Every model **must be able to do two things** (the `Recommender` class in [src/models/base.py](../src/models/base.py) writes this down, but it is commented out until Part 2):
 - `fit(train, n_users, n_items)` → learn
 - `score(users)` → give each user a score for each movie
 
@@ -369,7 +358,6 @@ That means:
 | `results/results.csv` | `results.write_results` | Metrics for each model × val/test |
 | `results/eda_stats.json` | `eda.run` | Data statistics, split sizes, cut dates |
 | `results/figures/` data plots | `eda.plot_all` | 4 figures: long tail (items, users), rating distribution, activity over time |
-| `results/figures/` result plots | `plots.run` | 3 figures: test results, kNN tuning, sensitivity |
 | `results/part1_item_knn_grid.csv` | `part1.run` step 5 | All 15 tuning trials |
 | `results/part1_sensitivity.csv` | `part1.run` step 8 | Comparison of thresholds 1/5/20 |
 | `results/logs/run.log` | `run_all.setup_logging` | Everything you see on the screen |
@@ -378,7 +366,7 @@ That means:
 
 ## 6. To understand it yourself
 
-1. **Walk through it with the debugger:** put a breakpoint on [part1.py:81](../src/experiments/part1.py#L81), press F5,
+1. **Walk through it with the debugger:** put a breakpoint on [part1.py:80](../src/experiments/part1.py#L80), press F5,
    and type `train.head()` and `cut_info` in the Debug Console. Then step forward with F10.
 2. **Run the tests:** `python -m pytest tests -q` → shows that NDCG gives the same result as the example on the lecture slide.
 3. **Change something and see what happens:** set `ITEM_KNN_K_GRID = [5, 50]` in [config.py](../config.py), run again, and see how the grid file changed.

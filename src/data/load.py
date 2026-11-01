@@ -9,8 +9,7 @@ Files use '::' as separator and latin-1 encoding (movie titles contain accents).
 
 Functions:
 - load_ratings(data_dir) -> DataFrame[user, item, rating, timestamp(datetime)]
-- load_movies(data_dir)  -> DataFrame[item, title, year, genres(list)]
-      year parsed from the title "(1995)".
+- load_movies(data_dir)  -> DataFrame[item, title, genres]
 - build_id_maps(...)     -> contiguous 0..n-1 indices for users/items (for sparse matrices).
   Item index must cover the FULL catalogue (all ~3,700 movies), because we rank against it.
 """
@@ -41,8 +40,9 @@ def load_ratings(data_dir) -> pd.DataFrame:
 def load_movies(data_dir) -> pd.DataFrame:
     df = _read_dat(Path(data_dir) / "movies.dat", ["item", "title", "genres"])
     df["item"] = df["item"].astype("int32")
-    df["year"] = df["title"].str.extract(r"\((\d{4})\)\s*$")[0].astype("Int16")
-    df["genres"] = df["genres"].str.split("|")
+    # Part 2-3: content-based models and re-ranking need the year and the genre list
+    # df["year"] = df["title"].str.extract(r"\((\d{4})\)\s*$")[0].astype("Int16")
+    # df["genres"] = df["genres"].str.split("|")
     return df
 
 

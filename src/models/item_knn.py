@@ -15,7 +15,7 @@ Implementation: scipy.sparse; the 3.7k × 3.7k similarity matrix fits easily in 
 import numpy as np
 import scipy.sparse as sp
 
-from src.models.base import Recommender
+# from src.models.base import Recommender  # Part 2
 from src.split import to_csr
 
 
@@ -58,7 +58,7 @@ def keep_top_k(S: np.ndarray, k: int) -> sp.csr_matrix:
     return out
 
 
-class ItemKNN(Recommender):
+class ItemKNN:  # Part 2: ItemKNN(Recommender)
     def __init__(self, k: int, similarity: str = "cosine"):
         self.k = k
         self.similarity = similarity

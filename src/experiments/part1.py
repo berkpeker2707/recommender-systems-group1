@@ -25,7 +25,7 @@ import numpy as np
 import pandas as pd
 
 import config
-from src import eda, plots
+from src import eda
 from src.data.load import add_indices, build_id_maps, load_movies, load_ratings
 from src.evaluation.evaluator import evaluate
 from src.evaluation.stats import mean_ci
@@ -42,8 +42,7 @@ def score_model(model, fit_df, target_df, maps, min_train=config.MIN_TRAIN_INTER
     users, _ = eval_users(fit_df, target_df, min_train, config.POSITIVE_THRESHOLD)
     gt = ground_truth(target_df, config.POSITIVE_THRESHOLD, users)
     seen = to_csr(fit_df, maps.n_users, maps.n_items, values="binary")
-    summary, per_user, _ = evaluate(model, seen, gt, users, config.TOP_K)
-    return summary, per_user
+    return evaluate(model, seen, gt, users, config.TOP_K)
 
 
 def popularity_models():
@@ -145,6 +144,3 @@ def run(data_dir, out_dir):
     sens.to_csv(out_dir / "part1_sensitivity.csv", index=False, float_format="%.5f")
     log.info("sensitivity to MIN_TRAIN_INTERACTIONS (test NDCG@10):\n%s",
              sens.pivot(index="model", columns="min_train", values=ndcg).round(4).to_string())
-
-    # ---------------------------------------------------------------- 7. result figures
-    plots.run(rows, grid, sens, out_dir / "figures")

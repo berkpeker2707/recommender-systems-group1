@@ -3,10 +3,10 @@ Most Popular baseline
 """
 import numpy as np
 
-from src.models.base import Recommender
+# from src.models.base import Recommender  # Part 2
 
 
-class MostPopular(Recommender):
+class MostPopular:  # Part 2: MostPopular(Recommender)
     def __init__(self, name: str, window_days=None, positives_only=False, threshold=4):
         self.name = name
         self.window_days = window_days

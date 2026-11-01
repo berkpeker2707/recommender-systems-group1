@@ -29,10 +29,9 @@ def make_row(part: int, model, split: str, seed: int, summary: dict, ndcg_ci: fl
 
 
 def write_results(rows: list, path: Path, part: int):
-    """Replace this part's rows in results.csv, keep the other parts' rows."""
     new = pd.DataFrame(rows, columns=COLUMNS)
-    if path.exists():
-        old = pd.read_csv(path)
-        new = pd.concat([old[old["part"] != part], new], ignore_index=True)
-    path.parent.mkdir(parents=True, exist_ok=True)
+    # Part 2-3: uncomment to keep the rows of the other parts in results.csv
+    # if path.exists():
+    #     old = pd.read_csv(path)
+    #     new = pd.concat([old[old["part"] != part], new], ignore_index=True)
     new.to_csv(path, index=False, float_format="%.5f")
