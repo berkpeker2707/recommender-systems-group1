@@ -1,0 +1,21 @@
+// Mirrors .vscode/launch.json (both use the project venv).
+[
+  {
+    "label": "Part 1 (run_all.py)",
+    "adapter": "Debugpy",
+    "request": "launch",
+    "program": "$ZED_WORKTREE_ROOT/run_all.py",
+    "args": ["--data-dir", "data/ml-1m"],
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "python": "$ZED_WORKTREE_ROOT/.venv/bin/python"
+  },
+  {
+    "label": "Metric tests (pytest)",
+    "adapter": "Debugpy",
+    "request": "launch",
+    "module": "pytest",
+    "args": ["tests", "-q"],
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "python": "$ZED_WORKTREE_ROOT/.venv/bin/python"
+  }
+]

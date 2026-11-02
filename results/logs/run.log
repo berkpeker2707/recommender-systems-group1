@@ -1,37 +1,37 @@
-2026-11-01 21:27:18,653 INFO run_all: ===== Part 1 =====
-2026-11-01 21:27:19,686 INFO src.experiments.part1: loaded 1000209 ratings, 6040 users, 3883 catalogue items
-2026-11-01 21:27:19,721 INFO src.experiments.part1: temporal split: {"t1": "2000-12-02 14:52:18", "t2": "2000-12-29 23:43:34", "n_train": 800164, "n_val": 100024, "n_test": 100021, "frac_train": 0.7999968006686603, "frac_val": 0.10000309935223538, "frac_test": 0.10000009997910436}
-2026-11-01 21:27:20,370 INFO src.experiments.part1: EDA: density=0.0447 top20%items=66.7% of ratings
-2026-11-01 21:27:20,376 INFO src.experiments.part1: [val] user filtering: {"target_users": 1134, "dropped_cold_new": 611, "dropped_cold_few": 3, "dropped_no_relevant": 30, "evaluated_users": 490, "target_rows": 100024, "target_rows_kept": 23543}
-2026-11-01 21:27:20,382 INFO src.experiments.part1: [test] user filtering: {"target_users": 1209, "dropped_cold_new": 29, "dropped_cold_few": 5, "dropped_no_relevant": 21, "evaluated_users": 1154, "target_rows": 100021, "target_rows_kept": 95532}
-2026-11-01 21:27:20,466 INFO src.experiments.part1: [val] pop_alltime_count                P@10=0.1035 R@10=0.0442 NDCG@10=0.1170 cov=0.033 users=490 ±0.0177
-2026-11-01 21:27:20,549 INFO src.experiments.part1: [val] pop_alltime_positive             P@10=0.1120 R@10=0.0476 NDCG@10=0.1243 cov=0.031 users=490 ±0.0180
-2026-11-01 21:27:20,636 INFO src.experiments.part1: [val] pop_recent90_count               P@10=0.1041 R@10=0.0524 NDCG@10=0.1166 cov=0.030 users=490 ±0.0170
-2026-11-01 21:27:20,812 INFO src.experiments.part1: [test] pop_alltime_count                P@10=0.1851 R@10=0.0517 NDCG@10=0.2003 cov=0.038 users=1154 ±0.0140
-2026-11-01 21:27:20,993 INFO src.experiments.part1: [test] pop_alltime_positive             P@10=0.1945 R@10=0.0566 NDCG@10=0.2120 cov=0.036 users=1154 ±0.0144
-2026-11-01 21:27:21,158 INFO src.experiments.part1: [test] pop_recent90_count               P@10=0.1873 R@10=0.0535 NDCG@10=0.2018 cov=0.032 users=1154 ±0.0141
-2026-11-01 21:27:21,804 INFO src.experiments.part1: [val] item_knn_cosine_k10              P@10=0.0796 R@10=0.0545 NDCG@10=0.0937 cov=0.171 users=490 ±0.0143
-2026-11-01 21:27:22,464 INFO src.experiments.part1: [val] item_knn_cosine_k20              P@10=0.0741 R@10=0.0454 NDCG@10=0.0905 cov=0.173 users=490 ±0.0149
-2026-11-01 21:27:23,134 INFO src.experiments.part1: [val] item_knn_cosine_k50              P@10=0.0790 R@10=0.0435 NDCG@10=0.0921 cov=0.172 users=490 ±0.0152
-2026-11-01 21:27:23,858 INFO src.experiments.part1: [val] item_knn_cosine_k100             P@10=0.0822 R@10=0.0492 NDCG@10=0.0965 cov=0.162 users=490 ±0.0149
-2026-11-01 21:27:24,631 INFO src.experiments.part1: [val] item_knn_cosine_k200             P@10=0.0906 R@10=0.0465 NDCG@10=0.1012 cov=0.148 users=490 ±0.0157
-2026-11-01 21:27:25,334 INFO src.experiments.part1: [val] item_knn_jaccard_k10             P@10=0.0855 R@10=0.0563 NDCG@10=0.1037 cov=0.142 users=490 ±0.0157
-2026-11-01 21:27:26,044 INFO src.experiments.part1: [val] item_knn_jaccard_k20             P@10=0.0855 R@10=0.0515 NDCG@10=0.1014 cov=0.140 users=490 ±0.0159
-2026-11-01 21:27:26,770 INFO src.experiments.part1: [val] item_knn_jaccard_k50             P@10=0.0876 R@10=0.0427 NDCG@10=0.0984 cov=0.136 users=490 ±0.0158
-2026-11-01 21:27:27,565 INFO src.experiments.part1: [val] item_knn_jaccard_k100            P@10=0.0902 R@10=0.0469 NDCG@10=0.1030 cov=0.125 users=490 ±0.0159
-2026-11-01 21:27:28,387 INFO src.experiments.part1: [val] item_knn_jaccard_k200            P@10=0.0945 R@10=0.0445 NDCG@10=0.1058 cov=0.114 users=490 ±0.0164
-2026-11-01 21:27:29,442 INFO src.experiments.part1: [val] item_knn_adjusted_cosine_k10     P@10=0.0945 R@10=0.0596 NDCG@10=0.1161 cov=0.132 users=490 ±0.0168
-2026-11-01 21:27:30,509 INFO src.experiments.part1: [val] item_knn_adjusted_cosine_k20     P@10=0.0957 R@10=0.0540 NDCG@10=0.1137 cov=0.118 users=490 ±0.0169
-2026-11-01 21:27:31,628 INFO src.experiments.part1: [val] item_knn_adjusted_cosine_k50     P@10=0.1073 R@10=0.0590 NDCG@10=0.1266 cov=0.103 users=490 ±0.0178
-2026-11-01 21:27:32,721 INFO src.experiments.part1: [val] item_knn_adjusted_cosine_k100    P@10=0.1116 R@10=0.0603 NDCG@10=0.1249 cov=0.095 users=490 ±0.0176
-2026-11-01 21:27:33,843 INFO src.experiments.part1: [val] item_knn_adjusted_cosine_k200    P@10=0.1116 R@10=0.0572 NDCG@10=0.1260 cov=0.087 users=490 ±0.0183
-2026-11-01 21:27:33,844 INFO src.experiments.part1: best item-kNN on validation: similarity=adjusted_cosine k=50 NDCG@10=0.1266
-2026-11-01 21:27:35,126 INFO src.experiments.part1: [test] item_knn                         P@10=0.2004 R@10=0.0650 NDCG@10=0.2185 cov=0.143 users=1154 ±0.0140
-2026-11-01 21:27:37,118 INFO src.experiments.part1: sensitivity to MIN_TRAIN_INTERACTIONS (test NDCG@10):
+INFO run_all: ===== Part 1 =====
+INFO src.experiments.run_part1: loaded 1000209 ratings, 6040 users, 3883 catalogue items
+INFO src.experiments.run_part1: temporal split: {"t1": "2000-12-02 14:52:18", "t2": "2000-12-29 23:43:34", "n_train": 800164, "n_val": 100024, "n_test": 100021, "frac_train": 0.7999968006686603, "frac_val": 0.10000309935223538, "frac_test": 0.10000009997910436}
+INFO src.experiments.run_part1: EDA: density=0.0447 top20%items=66.7% of ratings
+INFO src.experiments.run_part1: [val] user filtering: {"target_users": 1134, "dropped_cold_new": 611, "dropped_cold_few": 3, "dropped_no_relevant": 30, "evaluated_users": 490, "target_rows": 100024, "target_rows_kept": 23543}
+INFO src.experiments.run_part1: [test] user filtering: {"target_users": 1209, "dropped_cold_new": 29, "dropped_cold_few": 5, "dropped_no_relevant": 21, "evaluated_users": 1154, "target_rows": 100021, "target_rows_kept": 95532}
+INFO src.experiments.run_part1: [val] pop_alltime_count                P@10=0.1035 R@10=0.0442 NDCG@10=0.1170 cov=0.033 users=490 ±0.0177
+INFO src.experiments.run_part1: [val] pop_alltime_positive             P@10=0.1120 R@10=0.0476 NDCG@10=0.1243 cov=0.031 users=490 ±0.0180
+INFO src.experiments.run_part1: [val] pop_recent90_count               P@10=0.1041 R@10=0.0524 NDCG@10=0.1166 cov=0.030 users=490 ±0.0170
+INFO src.experiments.run_part1: [test] pop_alltime_count                P@10=0.1851 R@10=0.0517 NDCG@10=0.2003 cov=0.038 users=1154 ±0.0140
+INFO src.experiments.run_part1: [test] pop_alltime_positive             P@10=0.1945 R@10=0.0566 NDCG@10=0.2120 cov=0.036 users=1154 ±0.0144
+INFO src.experiments.run_part1: [test] pop_recent90_count               P@10=0.1873 R@10=0.0535 NDCG@10=0.2018 cov=0.032 users=1154 ±0.0141
+INFO src.experiments.run_part1: [val] item_knn_cosine_k10              P@10=0.0796 R@10=0.0545 NDCG@10=0.0937 cov=0.171 users=490 ±0.0143
+INFO src.experiments.run_part1: [val] item_knn_cosine_k20              P@10=0.0741 R@10=0.0454 NDCG@10=0.0905 cov=0.173 users=490 ±0.0149
+INFO src.experiments.run_part1: [val] item_knn_cosine_k50              P@10=0.0790 R@10=0.0435 NDCG@10=0.0921 cov=0.172 users=490 ±0.0152
+INFO src.experiments.run_part1: [val] item_knn_cosine_k100             P@10=0.0822 R@10=0.0492 NDCG@10=0.0965 cov=0.162 users=490 ±0.0149
+INFO src.experiments.run_part1: [val] item_knn_cosine_k200             P@10=0.0906 R@10=0.0465 NDCG@10=0.1012 cov=0.148 users=490 ±0.0157
+INFO src.experiments.run_part1: [val] item_knn_jaccard_k10             P@10=0.0855 R@10=0.0563 NDCG@10=0.1037 cov=0.142 users=490 ±0.0157
+INFO src.experiments.run_part1: [val] item_knn_jaccard_k20             P@10=0.0855 R@10=0.0515 NDCG@10=0.1014 cov=0.140 users=490 ±0.0159
+INFO src.experiments.run_part1: [val] item_knn_jaccard_k50             P@10=0.0876 R@10=0.0427 NDCG@10=0.0984 cov=0.136 users=490 ±0.0158
+INFO src.experiments.run_part1: [val] item_knn_jaccard_k100            P@10=0.0902 R@10=0.0469 NDCG@10=0.1030 cov=0.125 users=490 ±0.0159
+INFO src.experiments.run_part1: [val] item_knn_jaccard_k200            P@10=0.0945 R@10=0.0445 NDCG@10=0.1058 cov=0.114 users=490 ±0.0164
+INFO src.experiments.run_part1: [val] item_knn_adjusted_cosine_k10     P@10=0.0945 R@10=0.0596 NDCG@10=0.1161 cov=0.132 users=490 ±0.0168
+INFO src.experiments.run_part1: [val] item_knn_adjusted_cosine_k20     P@10=0.0957 R@10=0.0540 NDCG@10=0.1137 cov=0.118 users=490 ±0.0169
+INFO src.experiments.run_part1: [val] item_knn_adjusted_cosine_k50     P@10=0.1073 R@10=0.0590 NDCG@10=0.1266 cov=0.103 users=490 ±0.0178
+INFO src.experiments.run_part1: [val] item_knn_adjusted_cosine_k100    P@10=0.1116 R@10=0.0603 NDCG@10=0.1249 cov=0.095 users=490 ±0.0176
+INFO src.experiments.run_part1: [val] item_knn_adjusted_cosine_k200    P@10=0.1116 R@10=0.0572 NDCG@10=0.1260 cov=0.087 users=490 ±0.0183
+INFO src.experiments.run_part1: best item-kNN on validation: similarity=adjusted_cosine k=50 NDCG@10=0.1266
+INFO src.experiments.run_part1: [test] item_knn                         P@10=0.2004 R@10=0.0650 NDCG@10=0.2185 cov=0.143 users=1154 ±0.0140
+INFO src.experiments.run_part1: sensitivity to MIN_USER_RATINGS_IN_TRAINING (test NDCG@10):
 min_train                 1       5       20
 model                                       
 item_knn              0.2183  0.2185  0.2178
 pop_alltime_count     0.2007  0.2003  0.1966
 pop_alltime_positive  0.2121  0.2120  0.2067
 pop_recent90_count    0.2022  0.2018  0.1983
-2026-11-01 21:27:37,119 INFO run_all: Part 1 done in 18.5 s
+INFO run_all: Part 1 done

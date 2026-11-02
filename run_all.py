@@ -9,12 +9,17 @@ from pathlib import Path
 
 
 def setup_logging(out_dir: Path):
+    # The file log (results/logs/run.log) is committed, so it must be reproducible:
+    # no timestamps and no wall-clock durations, so it only changes when results/code change.
+    # The console keeps timestamps.
     (out_dir / "logs").mkdir(parents=True, exist_ok=True)
-    logging.basicConfig(
-        level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s",
-        handlers=[logging.StreamHandler(sys.stdout),
-                  logging.FileHandler(out_dir / "logs" / "run.log", mode="w")])
-    logging.getLogger("matplotlib").setLevel(logging.WARNING)
+    console = logging.StreamHandler(sys.stdout)
+    console.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(name)s: %(message)s"))
+    file = logging.FileHandler(out_dir / "logs" / "run.log", mode="w")
+    file.setFormatter(logging.Formatter("%(levelname)s %(name)s: %(message)s"))
+    logging.basicConfig(level=logging.INFO, handlers=[console, file])
+    # matplotlib's one-off "building the font cache" warning would make the log machine-dependent
+    logging.getLogger("matplotlib").setLevel(logging.ERROR)
 
 
 def main():
@@ -37,7 +42,8 @@ def main():
     t0 = time.time()
     log.info("===== Part 1 =====")
     run_part1(data_dir, out_dir)
-    log.info("Part 1 done in %.1f s", time.time() - t0)
+    log.info("Part 1 done")
+    print(f"Part 1 done in {time.time() - t0:.1f} s")  # console only, keeps run.log deterministic
 
 
 if __name__ == "__main__":
