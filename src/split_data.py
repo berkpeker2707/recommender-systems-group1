@@ -6,6 +6,7 @@ import pandas as pd
 import scipy.sparse as sp
 
 
+# 80% for training, %10 for validation, 10% for test
 def split_ratings_by_time(ratings: pd.DataFrame, fractions=(0.8, 0.1, 0.1)):
     """Ratings from the same second always land in the same split."""
     assert abs(sum(fractions) - 1) < 1e-9
