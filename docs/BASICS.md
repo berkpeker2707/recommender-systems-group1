@@ -30,7 +30,7 @@ User 1 gave movie 1193 five stars, on 31 December 2000 at 22:12
 | **interaction** | "This user did something with this movie" (for us: rated it) | 1,000,209 |
 | **timestamp** | The moment the rating was given | April 2000 – February 2003 |
 
-**In the code:** the files are read in [src/data/load.py](../src/data/load.py).
+**In the code:** the files are read in [src/data/load_data.py](../src/data/load_data.py).
 
 ---
 
@@ -50,7 +50,7 @@ Carol           4          –         –        2
 
 **Why it matters:** a recommender's whole job is to guess those empty cells, and with this much empty space the job is hard.
 A mostly-empty table like this is called **sparse**. In the code we store only the filled cells, which saves memory.
-The function that builds this table is `to_csr()` in [split.py](../src/split.py).
+The function that builds this table is `build_user_movie_matrix()` in [split_data.py](../src/split_data.py).
 
 ---
 
@@ -81,7 +81,7 @@ A **model** is a program that looks at data and derives a rule. It has two jobs:
 2. **score:** gives every movie a number for a given user. The 10 highest-scoring movies become the recommendation list.
 
 We have two models:
-- **Most Popular:** the only thing it learns is how many times each movie was watched. It recommends the most popular movies to everyone. → [popularity.py](../src/models/popularity.py)
+- **Most Popular:** the only thing it learns is how many times each movie was watched. It recommends the most popular movies to everyone. → [most_popular.py](../src/models/most_popular.py)
 - **Item-kNN:** learns which movies are similar to each other, then recommends movies similar to the ones you watched. → [item_knn.py](../src/models/item_knn.py)
 
 ---
@@ -135,7 +135,7 @@ Apr 2000 ─────────────── 2 Dec 2000 ──── 2
                                │     (10%)      │
 ```
 
-**In the code:** the fractions are `SPLIT_FRACTIONS` in [config.py](../config.py); the split itself is `temporal_split()` in [split.py](../src/split.py).
+**In the code:** the fractions are `SPLIT_FRACTIONS` in [config.py](../config.py); the split itself is `split_ratings_by_time()` in [split_data.py](../src/split_data.py).
 
 ---
 
@@ -143,7 +143,7 @@ Apr 2000 ─────────────── 2 Dec 2000 ──── 2
 
 "Threshold" just means **a cut-off value**: above it something counts as A, below it as B. The project has two different thresholds, and they answer different questions.
 
-### Threshold 1: what does "liked" mean? → `POSITIVE_THRESHOLD = 4`
+### Threshold 1: what does "liked" mean? → `RELEVANT_RATING_THRESHOLD = 4`
 
 We recommended a movie and the user rated it during the test period. Was the recommendation a hit?
 - They gave it 5 stars: yes, they liked it.
@@ -155,9 +155,9 @@ We have to draw a line. We chose **4 or more = liked (relevant / a hit)**.
 **Why it exists:** we don't have "yes, I liked it / no, I didn't" data, only stars. We need a rule that turns stars into yes or no.
 This rule is called the **feedback treatment** (how we interpret the feedback).
 
-**In the code:** `POSITIVE_THRESHOLD` in [config.py](../config.py). It is used in `ground_truth()` in [split.py](../src/split.py), which builds each user's "answer key": the movies they rated 4–5.
+**In the code:** `RELEVANT_RATING_THRESHOLD` in [config.py](../config.py). It is used in `find_relevant_movies()` in [split_data.py](../src/split_data.py), which builds each user's "answer key": the movies they rated 4–5.
 
-### Threshold 2: who takes the exam? → `MIN_TRAIN_INTERACTIONS = 5`
+### Threshold 2: who takes the exam? → `MIN_USER_RATINGS_IN_TRAINING = 5`
 
 Imagine a user with only **one rating** in train. We know almost nothing about them, so a personal recommendation is impossible.
 This is called the **cold start** problem. If we included such users, the scores would measure luck rather than model quality.
@@ -168,7 +168,7 @@ That leaves **1,154 users**.
 **Why 5?** There is no single right answer; it is a choice. That is why the brief says "state the threshold and how many rows it removed".
 We went one step further and checked **whether changing the threshold changes the results** (we tried 1 and 20). This is called a **sensitivity check**.
 
-**In the code:** `MIN_TRAIN_INTERACTIONS` in [config.py](../config.py); the filtering is `eval_users()` in [split.py](../src/split.py).
+**In the code:** `MIN_USER_RATINGS_IN_TRAINING` in [config.py](../config.py); the filtering is `select_users_to_evaluate()` in [split_data.py](../src/split_data.py).
 
 ---
 
@@ -186,7 +186,7 @@ Item-kNN has two hyperparameters:
 We ran 3 × 5 = 15 trials, measured them all on **validation**, and picked the best (adjusted cosine, k = 50).
 We did **not** use the test set for tuning. That would be like studying with the final exam's questions.
 
-**In the code:** the values tried are `ITEM_KNN_K_GRID` and `ITEM_KNN_SIM_GRID` in [config.py](../config.py). The tuning loop is in [part1.py](../src/experiments/part1.py), under the comment "4. item-kNN tuning".
+**In the code:** the values tried are `ITEM_KNN_NEIGHBOR_COUNTS` and `ITEM_KNN_SIMILARITY_MEASURES` in [config.py](../config.py). The tuning loop is in [run_part1.py](../src/experiments/run_part1.py), under the comment "4. item-kNN tuning".
 
 ---
 
@@ -220,7 +220,7 @@ Part 1 actually has **almost no randomness**:
 - Item-kNN computes similarities with a formula.
 - When two movies have equal scores, a "stable sort" (`kind="stable"`) decides the order. It is not random; it gives the same order every time.
 
-Still, as a safeguard, [part1.py](../src/experiments/part1.py) starts with `np.random.seed(config.SEED)`, and the seed is `SEED = 42` in [config.py](../config.py).
+Still, as a safeguard, [run_part1.py](../src/experiments/run_part1.py) starts with `np.random.seed(config.SEED)`, and the seed is `SEED = 42` in [config.py](../config.py).
 As a result, the numbers come out exactly the same no matter how many times you run the code. We checked this by generating the README twice and comparing.
 (42 has no special meaning; it is a traditional choice.)
 
@@ -240,7 +240,7 @@ We recommended 10 movies to a user. During the test period that user gave 4–5 
 "@10" means "looking at the first 10 items of the list".
 
 These scores are computed for each user separately and then averaged.
-**In the code:** the formulas are in [metrics.py](../src/evaluation/metrics.py); [evaluator.py](../src/evaluation/evaluator.py) runs them over all users.
+**In the code:** the formulas are in [metrics.py](../src/evaluation/metrics.py); [evaluate_model.py](../src/evaluation/evaluate_model.py) runs them over all users.
 
 ### Full catalogue
 
@@ -261,7 +261,7 @@ If the intervals of two models overlap, the difference between them might be due
 
 **Our result:** kNN has the highest score (0.219), but its interval overlaps with that of the best Popular variant (0.212). So we **cannot say kNN is clearly better** on accuracy. On coverage the difference is very clear: 14.3% vs 3.6%.
 
-**In the code:** `mean_ci()` in [stats.py](../src/evaluation/stats.py).
+**In the code:** `mean_with_confidence_interval()` in [confidence_interval.py](../src/evaluation/confidence_interval.py).
 
 ---
 
@@ -281,4 +281,4 @@ If the intervals of two models overlap, the difference between them might be due
 
 Every step here is deterministic, so each run gives the same result. The seed is the safeguard on top of that.
 
-Next: to see how this story flows through the code, read [CODE_WALKTHROUGH.md](CODE_WALKTHROUGH.md); for how each line of the brief maps to our work, read [PART1_REQUIREMENTS.md](PART1_REQUIREMENTS.md).
+Next: to see how this story flows through the code, read [CODE_WALKTHROUGH.md](CODE_WALKTHROUGH.md); for how each line of the brief id_mappings to our work, read [PART1_REQUIREMENTS.md](PART1_REQUIREMENTS.md).

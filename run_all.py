@@ -1,14 +1,5 @@
 """
-run_all.py — the single documented command (brief §4, requirement 1).
-
-    python run_all.py --data-dir data/ml-1m [--out results]
-
-1. Parse args (data dir is configurable; no hard-coded paths).
-2. Set up logging to results/logs/run.log.
-3. Run src.experiments.part1 (loads data, builds the split, runs the baselines).
-4. The experiment writes rows via src.results -> results/results.csv
-   in the course template schema; figures go to results/figures/.
-5. Exit non-zero on any failure, so a broken run is never silently "complete".
+Runs the project: python run_all.py --data-dir data/ml-1m [--out results]
 """
 import argparse
 import logging
@@ -42,10 +33,10 @@ def main():
         log.error("missing %s in %s — point --data-dir at the unzipped ml-1m folder", missing, data_dir)
         sys.exit(1)
 
-    from src.experiments import part1
+    from src.experiments.run_part1 import run_part1
     t0 = time.time()
     log.info("===== Part 1 =====")
-    part1.run(data_dir, out_dir)
+    run_part1(data_dir, out_dir)
     log.info("Part 1 done in %.1f s", time.time() - t0)
 
 

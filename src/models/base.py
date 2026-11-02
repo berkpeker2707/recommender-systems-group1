@@ -7,7 +7,7 @@
 # class Recommender:
 #     name = "base"
 #
-#     def fit(self, train: pd.DataFrame, n_users: int, n_items: int) -> "Recommender":
+#     def fit(self, training_ratings: pd.DataFrame, n_users: int, n_movies: int) -> "Recommender":
 #         raise NotImplementedError
 #
 #     def score(self, user_indices: np.ndarray) -> np.ndarray:

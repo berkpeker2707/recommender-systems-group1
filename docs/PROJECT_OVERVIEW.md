@@ -81,7 +81,7 @@ The report is one document, extended in each part. You must score at least 40% o
 
 ### 4.5 Still to do for Part 1
 
-- Download the **official results template** and make `src/results.py` match its columns exactly.
+- Download the **official results template** and make `src/save_results.py` match its columns exactly.
 - Download the **report template** and write the report.
 - Create the **GitHub repository** and put its link in the report.
 - Write the "Use of AI" section and the contribution statement (2–3 sentences per person).

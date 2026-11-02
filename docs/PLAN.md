@@ -6,7 +6,7 @@ Source of truth: the project brief (RecSys-Project.pdf).
 
 | Model | Lecture | Implementation |
 |---|---|---|
-| Most Popular (3 variants) | 1.1 s9 | own, `src/models/popularity.py` |
+| Most Popular (3 variants) | 1.1 s9 | own, `src/models/most_popular.py` |
 | Item-based kNN (tune k + similarity) | 1.2 s5–10 | own, `src/models/item_knn.py` |
 
 ## Protocol decisions (each needs 1–2 sentences in the report)

@@ -1,14 +1,11 @@
 """
-stats.py — variability (Lecture 3.1 slide 10).
-
-- mean_ci(values) -> mean, 95% CI half-width (t-distribution), computed over users.
-Rule from the brief: "a difference reported without an interval will not be accepted".
+Mean and 95% confidence interval half-width (t-distribution) of a per-user metric.
 """
 import numpy as np
 from scipy import stats
 
 
-def mean_ci(values, confidence: float = 0.95):
+def mean_with_confidence_interval(values, confidence: float = 0.95):
     x = np.asarray(values, dtype=float)
     if len(x) < 2:
         return float(x.mean()), float("nan")

@@ -24,7 +24,7 @@ Code walkthrough for everyone: [CODE_WALKTHROUGH.md](CODE_WALKTHROUGH.md).
 
 |                          |                                                                                                                     |
 | ------------------------ | ------------------------------------------------------------------------------------------------------------------- |
-| **Owns code**            | [src/data/load.py](../src/data/load.py), [src/eda.py](../src/eda.py)                                                |
+| **Owns code**            | [src/data/load_data.py](../src/data/load_data.py), [src/summarize_data.py](../src/summarize_data.py)                                                |
 | **Report section**       | _Data_ (~1 page): #users, #items, #interactions, density; long-tail figure; rating distribution; activity over time |
 | **Outputs used**         | `results/eda_stats.json`, `results/figures/*.png`                                                                   |
 | **"Excellent" question** | How extreme is the long tail? (top 20% of items = 66.7% of ratings, 21.6% of items < 20 ratings, 177 never rated)   |
@@ -40,7 +40,7 @@ To-do:
 
 |                           |                                                                                                                                                       |
 | ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Owns code**             | [src/split.py](../src/split.py), [src/evaluation/](../src/evaluation/) (evaluator, metrics, stats), [tests/test_metrics.py](../tests/test_metrics.py) |
+| **Owns code**             | [src/split_data.py](../src/split_data.py), [src/evaluation/](../src/evaluation/) (evaluator, metrics, stats), [tests/test_metrics.py](../tests/test_metrics.py) |
 | **Report section**        | _Protocol_ (~1 page): split, feedback treatment, filtering, candidate set, metrics; one or two sentences of justification per decision                |
 | **Outputs used**          | split numbers and cut dates in `eda_stats.json`, user-filtering counts in `run.log`, `results/part1_sensitivity.csv`                                  |
 | **"Excellent" questions** | What does timestamp burstiness do to the split? Does the filtering threshold change results more than the gap between baselines?                      |
@@ -57,14 +57,14 @@ To-do:
 
 |                       |                                                                                                                                                                                                                                                                                |
 | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Owns code**         | [src/models/](../src/models/) (`base.py`, `popularity.py`, `item_knn.py`), [src/experiments/part1.py](../src/experiments/part1.py), [src/results.py](../src/results.py), [run_all.py](../run_all.py), [config.py](../config.py), [README.md](../README.md), `requirements.txt` |
+| **Owns code**         | [src/models/](../src/models/) (`base.py`, `most_popular.py`, `item_knn.py`), [src/experiments/run_part1.py](../src/experiments/run_part1.py), [src/save_results.py](../src/save_results.py), [run_all.py](../run_all.py), [config.py](../config.py), [README.md](../README.md), `requirements.txt` |
 | **Report section**    | _Baselines & results_ (~1.2 pages): the two baselines, the kNN tuning grid and the chosen k, the results table with CIs, coverage discussion                                                                                                                                   |
 | **Outputs used**      | `results/results.csv`, `results/part1_item_knn_grid.csv`                                                                                                                                                                                                                       |
 | **"Excellent" angle** | Why Most Popular is so hard to beat here, and what item-kNN buys us (≈4× coverage for a small accuracy gain)                                                                                                                                                                   |
 
 To-do:
 
-- [ ] **Download the official results template** and make `COLUMNS` in `results.py` match it exactly (currently provisional)
+- [ ] **Download the official results template** and make `RESULT_COLUMNS` in `save_results.py` match it exactly (currently provisional)
 - [ ] Create the **GitHub repo**, push, and put the URL in the report
 - [ ] Fresh-clone test: new venv → `pip install -r requirements.txt` → put the data in `data/ml-1m` → `run_all.py` gives the same numbers
 - [ ] Write the baselines section + results table

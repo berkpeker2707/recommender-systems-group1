@@ -112,14 +112,14 @@ Metric unit tests: `python -m pytest tests -q`
 ```
 run_all.py               single entry point
 config.py                every tunable constant (seed, split, thresholds, grids)
-src/data/load.py         parse ml-1m (:: separated)
-src/eda.py               dataset characterisation + plots
-src/split.py             temporal train/val/test + user filtering
+src/data/load_data.py         parse ml-1m (:: separated)
+src/summarize_data.py               dataset characterisation + plots
+src/split_data.py             temporal train/val/test + user filtering
 src/models/              Most Popular, item-kNN (base.py is commented out until Part 2)
 src/evaluation/          metrics, full-catalogue evaluator, confidence intervals
-src/experiments/part1.py runs the whole Part 1 pipeline
-src/results.py           writes results in the mandatory template schema
-tests/                   metric unit tests (vs. Lecture 3.1 slide 8 worked example)
+src/experiments/run_part1.py runs the whole Part 1 pipeline
+src/save_results.py           writes results in the mandatory template schema
+tests/                   metric unit tests (worked example)
 docs/                    plan, code walkthrough, team split
 ```
 
@@ -127,14 +127,14 @@ docs/                    plan, code walkthrough, team split
 
 | Report item                                    | Output file                                              | Produced by              |
 | ---------------------------------------------- | -------------------------------------------------------- | ------------------------ |
-| Table: dataset statistics                      | results/eda_stats.json                                   | src/eda.py               |
-| Fig: long tail (interactions per item/user)    | results/figures/long_tail_items.png, long_tail_users.png | src/eda.py               |
-| Fig: rating distribution                       | results/figures/rating_dist.png                          | src/eda.py               |
-| Fig: activity over time + split cuts           | results/figures/activity_over_time.png                   | src/eda.py               |
-| Table: split sizes + user filtering            | results/eda_stats.json (`split`), results/logs/run.log   | src/split.py             |
-| Table: item-kNN tuning grid (validation)       | results/part1_item_knn_grid.csv                          | src/experiments/part1.py |
-| Table: Part 1 baselines                        | results/results.csv                                      | src/experiments/part1.py |
-| Table: sensitivity to user filtering           | results/part1_sensitivity.csv                            | src/experiments/part1.py |
+| Table: dataset statistics                      | results/eda_stats.json                                   | src/summarize_data.py               |
+| Fig: long tail (interactions per item/user)    | results/figures/long_tail_items.png, long_tail_users.png | src/summarize_data.py               |
+| Fig: rating distribution                       | results/figures/rating_dist.png                          | src/summarize_data.py               |
+| Fig: activity over time + split cuts           | results/figures/activity_over_time.png                   | src/summarize_data.py               |
+| Table: split sizes + user filtering            | results/eda_stats.json (`split`), results/logs/run.log   | src/split_data.py             |
+| Table: item-kNN tuning grid (validation)       | results/part1_item_knn_grid.csv                          | src/experiments/run_part1.py |
+| Table: Part 1 baselines                        | results/results.csv                                      | src/experiments/run_part1.py |
+| Table: sensitivity to user filtering           | results/part1_sensitivity.csv                            | src/experiments/run_part1.py |
 
 ## 7. Use of AI assistants
 

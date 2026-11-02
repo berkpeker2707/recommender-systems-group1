@@ -39,11 +39,11 @@ justify every decision from the lectures.
 | Time | April 2000 – February 2003. About 90% of ratings were given in 2000, so they are heavily bunched |
 
 **In the code:**
-- Reading the files: [load.py](../src/data/load.py) → `load_ratings`, `load_movies` (turn the `::` separated lines into tables)
-- All the numbers: [eda.py:40](../src/eda.py#L40) `dataset_stats()`
-  - "What share do the top 20% get": [eda.py:34](../src/eda.py#L34) `top_share()`
-- The plots: [eda.py:85](../src/eda.py#L85) `plot_all()`
-- Where this step is called: [part1.py:86](../src/experiments/part1.py#L86) `eda.run(...)`
+- Reading the files: [load_data.py](../src/data/load_data.py) → `load_ratings`, `load_movies` (turn the `::` separated lines into tables)
+- All the numbers: [summarize_data.py](../src/summarize_data.py) `dataset_stats()`
+  - "What share do the top 20% get": [summarize_data.py](../src/summarize_data.py) `top_share()`
+- The plots: [summarize_data.py](../src/summarize_data.py) `plot_all()`
+- Where this step is called: [run_part1.py](../src/experiments/run_part1.py) `summarize_data(...)`
 
 **Where the result is:** `results/eda_stats.json`, and in `results/figures/` the plots `long_tail_items.png`, `long_tail_users.png`,
 `rating_dist.png` and `activity_over_time.png`. Also the "1. The data" section of the README.
@@ -78,12 +78,12 @@ justify every decision from the lectures.
   right after the train cut, and many of its users had not rated anything before that cut.
 
 **In the code:**
-- The 80/10/10 fractions: [config.py:26](../config.py#L26) `SPLIT_FRACTIONS`
-- The split itself: [split.py:27](../src/split.py#L27) `temporal_split()`. Two ratings from the same second always land on the same side.
-- The filter threshold: [config.py:32](../config.py#L32) `MIN_TRAIN_INTERACTIONS = 5`
-- The filtering and the count of who was removed and why: [split.py:48](../src/split.py#L48) `eval_users()`
-- Split statistics (new vs known users): [eda.py:68](../src/eda.py#L68) `split_stats()`
-- Where these are called: [part1.py:84](../src/experiments/part1.py#L84) and [part1.py:92-98](../src/experiments/part1.py#L92-L98)
+- The 80/10/10 fractions: [config.py](../config.py) `SPLIT_FRACTIONS`
+- The split itself: [split_data.py](../src/split_data.py) `split_ratings_by_time()`. Two ratings from the same second always land on the same side.
+- The filter threshold: [config.py](../config.py) `MIN_USER_RATINGS_IN_TRAINING = 5`
+- The filtering and the count of who was removed and why: [split_data.py](../src/split_data.py) `select_users_to_evaluate()`
+- Split statistics (new vs known users): [summarize_data.py](../src/summarize_data.py) `split_stats()`
+- Where these are called: [run_part1.py](../src/experiments/run_part1.py) and [run_part1.py](../src/experiments/run_part1.py)
 
 **Where the result is:** The cut dates and split sizes are in `results/eda_stats.json` (`split_cuts`, `split`) and in the
 "2. Temporal split" section of the README. The rows removed by the filter are currently **only** in `results/logs/run.log` (the "user filtering" lines).
@@ -106,12 +106,12 @@ justify every decision from the lectures.
 **What we did:** 3 similarity measures × 5 values of k = 15 trials. The winner is **adjusted cosine, k = 50**. With this setting the model was retrained on train+val and went into the test once.
 
 **In the code:**
-- The values tried: [config.py:49-50](../config.py#L49-L50) `ITEM_KNN_K_GRID`, `ITEM_KNN_SIM_GRID`
-- The similarity calculation (formulas of the 3 measures): [item_knn.py:23](../src/models/item_knn.py#L23) `item_similarity()`
-- Keeping the k nearest neighbours: [item_knn.py:51](../src/models/item_knn.py#L51) `keep_top_k()`
-- Scoring for a user: [item_knn.py:79](../src/models/item_knn.py#L79) `score()`. For each candidate movie, it adds up the similarities to the movies the user watched.
-- The loop over the 15 trials and picking the winner: [part1.py:115-129](../src/experiments/part1.py#L115-L129)
-- Testing the winner: [part1.py:131-136](../src/experiments/part1.py#L131-L136)
+- The values tried: [config.py](../config.py) `ITEM_KNN_NEIGHBOR_COUNTS`, `ITEM_KNN_SIMILARITY_MEASURES`
+- The similarity calculation (formulas of the 3 measures): [item_knn.py](../src/models/item_knn.py) `compute_movie_similarity()`
+- Keeping the k nearest neighbours: [item_knn.py](../src/models/item_knn.py) `keep_nearest_neighbors()`
+- Scoring for a user: [item_knn.py](../src/models/item_knn.py) `score()`. For each candidate movie, it adds up the similarities to the movies the user watched.
+- The loop over the 15 trials and picking the winner: [run_part1.py](../src/experiments/run_part1.py)
+- Testing the winner: [run_part1.py](../src/experiments/run_part1.py)
 
 **Where the result is:** `results/part1_item_knn_grid.csv` and the "4. Item-kNN tuning" section of the README.
 
@@ -139,9 +139,9 @@ justify every decision from the lectures.
 | `pop_recent90_count` | Only the last 90 days of the training data, all ratings | 0.202 |
 
 **In the code:**
-- The variant definitions: [config.py:43](../config.py#L43) `POPULAR_VARIANTS`
-- The model: [popularity.py:24](../src/models/popularity.py#L24) `fit()`. It applies the time window if there is one, then the 4–5 filter if there is one, then counts how many times each movie appears.
-- Where it runs: [part1.py:107-113](../src/experiments/part1.py#L107-L113)
+- The variant definitions: [config.py](../config.py) `MOST_POPULAR_VARIANTS`
+- The model: [most_popular.py](../src/models/most_popular.py) `fit()`. It applies the time window if there is one, then the 4–5 filter if there is one, then counts how many times each movie appears.
+- Where it runs: [run_part1.py](../src/experiments/run_part1.py)
 
 **For the report:** *"We report three Most-Popular variants (all-time count, all-time positives only, last 90 days before the train cut); counting only positive ratings scores highest, which fits our definition of relevance."*
 
@@ -165,9 +165,9 @@ To show the metrics are calculated correctly, we wrote the example from Lecture 
 
 **In the code:**
 - The formulas of the 4 metrics: [metrics.py](../src/evaluation/metrics.py) → `precision_at_k` (line 15), `recall_at_k` (line 19), `ndcg_at_k` (line 25), `catalogue_coverage` (line 32)
-- Ranking over the full catalogue and removing watched movies: [evaluator.py:20](../src/evaluation/evaluator.py#L20) `top_k()`. It gives watched movies a score of -∞.
-- Computing the metrics for each user: [evaluator.py:32](../src/evaluation/evaluator.py#L32) `evaluate()`
-- "A hit" = 4–5 stars: [config.py:19](../config.py#L19) `POSITIVE_THRESHOLD`, [split.py:71](../src/split.py#L71) `ground_truth()`
+- Ranking over the full catalogue and removing watched movies: [evaluate_model.py](../src/evaluation/evaluate_model.py) `recommend_top_movies()`. It gives watched movies a score of -∞.
+- Computing the metrics for each user: [evaluate_model.py](../src/evaluation/evaluate_model.py) `evaluate_model()`
+- "A hit" = 4–5 stars: [config.py](../config.py) `RELEVANT_RATING_THRESHOLD`, [split_data.py](../src/split_data.py) `find_relevant_movies()`
 - The slide 8 test: [tests/test_metrics.py](../tests/test_metrics.py). To run it: `python -m pytest tests -q`
 
 **Where the result is:** `results/results.csv` and the "3. Baselines on the test set" section of the README.
@@ -212,7 +212,7 @@ All of these decisions are in [config.py](../config.py) with comments. Summary t
 
 The brief also asks these questions:
 - **How extreme is the long tail?** → The numbers in item 1.
-- **What does the burstiness of the timestamps do to the split?** → Validation is shorter than a month, and 611 of its 1,134 users are not in train at all. Numbers: [eda.py:68](../src/eda.py#L68) `split_stats()`
+- **What does the burstiness of the timestamps do to the split?** → Validation is shorter than a month, and 611 of its 1,134 users are not in train at all. Numbers: [summarize_data.py](../src/summarize_data.py) `split_stats()`
 - **Did the filtering threshold change the results by more than the gap between the baselines?** → About the same size.
   With a threshold of 20, popularity changes by ≈0.005; the gap between kNN and popularity is ≈0.007.
-  Code: [part1.py:140-154](../src/experiments/part1.py#L140-L154). Result: `results/part1_sensitivity.csv`.
+  Code: [run_part1.py](../src/experiments/run_part1.py). Result: `results/part1_sensitivity.csv`.
