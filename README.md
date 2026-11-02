@@ -93,7 +93,7 @@ Chosen: **adjusted cosine, k = 50** (validation NDCG@10 = 0.127).
 
 ## 2. Data
 MovieLens 1M is NOT included in the repository (GroupLens usage terms).
-Download it from https://grouplens.org/datasets/movielens/1m/ and unzip it so that
+Download it from https://homepages.tuni.fi/konstantinos.stefanidis/docs/ml-1m.zip and unzip it so that
 `data/ml-1m/ratings.dat` and `data/ml-1m/movies.dat` exist.
 
 ## 3. Reproduce everything (one command)
