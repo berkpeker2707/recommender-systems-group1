@@ -7,17 +7,54 @@ import scipy.sparse as sp
 
 
 # 80% for training, %10 for validation, 10% for test
+# the selection of %80 %10 %10 is personal, could be %90 %5 %5 etc.
+# this fucntion divides data into 3.
 def split_ratings_by_time(ratings: pd.DataFrame, fractions=(0.8, 0.1, 0.1)):
     """Ratings from the same second always land in the same split."""
+    # by default fractions are 0.8, 0.1, 0.1 
+    # assertion for fractions total to 1, just in case
     assert abs(sum(fractions) - 1) < 1e-9
+
+    #unix times (ex: 978300760) in an array
     unix_times = ratings["unix_time"].to_numpy()
+
+    # sorted unix times, so that we can split by time
     sorted_times = np.sort(unix_times)
+
+    # how many ratings we have in total
     n_ratings = len(sorted_times)
+
+    # the cutoff times for the splits, based on the fractions
+    ### example section starts ###
+    # unix_times = [50, 10, 90, 30, 70, 20, 100, 40, 60, 80]
+    # sorted_times = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+    # order::         0   1   2   3   4   5   6   7   8   9
+    # n_ratings = 10
+
+    # what is the cutoff time for the first 80% of ratings?
+    # 0.8 * 10 = 8.0
+    # round(8.0) = 8
+    # int(8) = 8
+
+    #train_validation_cutoff = sorted_times[8] which is 90
+    # train_ratings = ratings[unix_times < 90]
+
+    ### example section ends ###
+    
     train_validation_cutoff = sorted_times[int(round(fractions[0] * n_ratings))]
+
+    # cut of for 10% validation and 10% test
     validation_test_cutoff = sorted_times[int(round((fractions[0] + fractions[1]) * n_ratings))]
+
+    # taking training ratings 
     train_ratings = ratings[unix_times < train_validation_cutoff]
+
+    # taking validation ratings
     validation_ratings = ratings[(unix_times >= train_validation_cutoff) & (unix_times < validation_test_cutoff)]
+
+    # taking test ratings
     test_ratings = ratings[unix_times >= validation_test_cutoff]
+    
     split_info = {
         "t1": str(pd.to_datetime(train_validation_cutoff, unit="s")),
         "t2": str(pd.to_datetime(validation_test_cutoff, unit="s")),
