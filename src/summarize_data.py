@@ -43,17 +43,22 @@ def dataset_stats(ratings: pd.DataFrame, n_catalogue: int, threshold: int) -> di
         "first_rating": str(ratings["rated_at"].min()),
         "last_rating": str(ratings["rated_at"].max()),
         "ratings_by_year": {int(k): int(v) for k, v in by_year.items()},
+        # added for report Section 1.1
+        "density_catalogue": len(ratings) / (n_u * n_catalogue),
+        "top10pct_items_share": top_share(item_counts, 0.10),
+        "n_items_lt10_ratings": int((item_counts < 10).sum()),
+        "share_users_single_day": float((ratings["rated_at"].dt.date.groupby(ratings["user_id"]).nunique() == 1).mean()),
     }
 
 
-def split_stats(train, val, test) -> dict:
+def split_stats(train, val, test, threshold: int) -> dict:
     """How the bursty timestamps shape the split: who is in val/test and are they known?"""
     train_users, train_items = set(train["user_id"]), set(train["movie_id"])
     out = {}
     for name, part in (("train", train), ("val", val), ("test", test)):
         users, items = set(part["user_id"]), set(part["movie_id"])
         out[name] = {"rows": len(part), "users": len(users), "items": len(items),
-                     "positive_share": float((part["rating"] >= 4).mean())}
+                     "positive_share": float((part["rating"] >= threshold).mean())}
         if name != "train":
             out[name]["users_seen_in_train"] = len(users & train_users)
             out[name]["users_new"] = len(users - train_users)
@@ -117,7 +122,7 @@ def summarize_data(ratings, n_catalogue, threshold, out_dir: Path, splits=None, 
     stats = dataset_stats(ratings, n_catalogue, threshold)
     cuts = ()
     if splits is not None:
-        stats["split"] = split_stats(*splits)
+        stats["split"] = split_stats(*splits, threshold)
     if split_info is not None:
         stats["split_cuts"] = split_info
         cuts = ((split_info["t1"], "train|val"), (split_info["t2"], "val|test"))

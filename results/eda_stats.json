@@ -35,6 +35,10 @@
     "2002": 24046,
     "2003": 3348
   },
+  "density_catalogue": 0.04264679797998748,
+  "top10pct_items_share": 0.456757537674626,
+  "n_items_lt10_ratings": 623,
+  "share_users_single_day": 0.5874172185430464,
   "split": {
     "train": {
       "rows": 800164,
