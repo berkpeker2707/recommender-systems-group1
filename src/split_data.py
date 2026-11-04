@@ -54,11 +54,16 @@ def split_ratings_by_time(ratings: pd.DataFrame, fractions=(0.8, 0.1, 0.1)):
 
     # taking test ratings
     test_ratings = ratings[unix_times >= validation_test_cutoff]
-    
+
+    #|------------- train (80%) -------------|-- validation (10%) --|-- test (10%) --|
+    #           train_validation_cutoff      t1                     t2
     split_info = {
         "t1": str(pd.to_datetime(train_validation_cutoff, unit="s")),
         "t2": str(pd.to_datetime(validation_test_cutoff, unit="s")),
-        "n_train": len(train_ratings), "n_val": len(validation_ratings), "n_test": len(test_ratings),
+        "n_train": len(train_ratings),
+        "n_val": len(validation_ratings),
+        "n_test": len(test_ratings),
+        # fractions of ratings in each split
         "frac_train": len(train_ratings) / n_ratings, "frac_val": len(validation_ratings) / n_ratings,
         "frac_test": len(test_ratings) / n_ratings,
     }
@@ -80,10 +85,10 @@ def select_users_to_evaluate(training_ratings: pd.DataFrame, evaluation_ratings:
         users_with_enough_ratings[users_with_enough_ratings.isin(users_with_relevant_movie)].to_numpy())
 
     filter_stats = {
-        "target_users": len(all_users),
-        "dropped_cold_new": int(len(all_users) - len(users_in_training)),          # 0 training ratings
-        "dropped_cold_few": int(len(users_in_training) - len(users_with_enough_ratings)),  # too few
-        "dropped_no_relevant": int(len(users_with_enough_ratings) - len(selected_users)),
+        "target_users": len(all_users), # all with validation
+        "dropped_cold_new": int(len(all_users) - len(users_in_training)), # 0 training ratings
+        "dropped_cold_few": int(len(users_in_training) - len(users_with_enough_ratings)), # too few data
+        "dropped_no_relevant": int(len(users_with_enough_ratings) - len(selected_users)), # no 4 or 5 which is needed for validation and test
         "evaluated_users": int(len(selected_users)),
         "target_rows": len(evaluation_ratings),
         "target_rows_kept": int(evaluation_ratings["user_index"].isin(selected_users).sum()),
@@ -92,13 +97,17 @@ def select_users_to_evaluate(training_ratings: pd.DataFrame, evaluation_ratings:
 
 
 def find_relevant_movies(evaluation_ratings: pd.DataFrame, relevant_threshold: int, users=None) -> dict:
+    # RELEVANT_RATING_THRESHOLD is 4 so we only keep moviews with rating 4 or 5
     relevant_ratings = evaluation_ratings[evaluation_ratings["rating"] >= relevant_threshold]
+    # if users is not None, we only keep the relevant ratings for the selected users
     if users is not None:
         relevant_ratings = relevant_ratings[relevant_ratings["user_index"].isin(users)]
+    # we return a dict where the keys are the user_index and the values are sets of movie_index that are relevant for that user
     return {int(user_index): set(movies.tolist())
             for user_index, movies in relevant_ratings.groupby("user_index")["movie_index"]}
 
 
+# example return: [0, 1, 0, 1] => user 0 seen 1 and 3
 def build_user_movie_matrix(ratings: pd.DataFrame, n_users: int, n_movies: int, values: str = "rating") -> sp.csr_matrix:
     """User × movie matrix. values='rating' keeps 1–5 ratings, 'binary' stores 1.0."""
     cell_values = ratings["rating"].to_numpy(np.float32) if values == "rating" else np.ones(len(ratings), np.float32)
