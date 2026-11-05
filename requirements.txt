@@ -5,3 +5,4 @@ scipy==1.17.1           # sparse matrices for kNN / similarity
 matplotlib==3.11.2      # EDA plots
 # Dev only
 pytest==9.2.0
+ruff==0.17.3            # code formatter; settings in pyproject.toml

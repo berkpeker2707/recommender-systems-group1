@@ -45,6 +45,17 @@ The run is deterministic, so it regenerates the committed files exactly.
 **Tests** (metric implementation vs. the Lecture 3.1 slide 8 example):
 `uv run --python 3.11 --with-requirements requirements.txt -m pytest tests -q`
 
+**Code formatting** (only needed if you change the code): we use [Ruff](https://docs.astral.sh/ruff/),
+with its settings in `pyproject.toml`. Run these from the repository folder before you commit:
+
+```bash
+ruff check --select I --fix .   # sort the imports
+ruff format .                   # format all Python files
+```
+
+`ruff format --check .` only reports which files need formatting and changes nothing.
+In VS Code, the "Ruff" extension (`charliermarsh.ruff`) can format each file when you save it.
+
 ## Libraries used
 
 Python 3.11.17. All versions are pinned in `requirements.txt`.
@@ -56,6 +67,7 @@ Python 3.11.17. All versions are pinned in `requirements.txt`.
 | scipy      | 1.17.1  | `scipy.sparse`: the user × movie matrix and the kNN neighbour lists. `scipy.stats`: the t-distribution for 95% confidence intervals | `src/split_data.py`, `src/models/item_knn.py`, `src/evaluation/confidence_interval.py` |
 | matplotlib | 3.11.2  | All figures                                                                                                                         | `src/summarize_data.py`, `src/plots.py`                                                |
 | pytest     | 9.2.0   | Unit tests only; not needed to produce the results                                                                                  | `tests/`                                                                               |
+| ruff       | 0.17.3  | Code formatting only; not needed to produce the results                                                                             | `pyproject.toml`                                                                       |
 
 Everything else (`argparse`, `logging`, `pathlib`, `json`, …) is part of Python's standard library.
 **No recommender-system library is used:** Most Popular, item-kNN, the temporal split and all metrics
@@ -147,6 +159,7 @@ Chosen: **adjusted cosine, k = 50** (validation NDCG@10 = 0.127).
 ```
 run_all.py               single entry point
 config.py                every tunable constant (seed, split, thresholds, grids)
+pyproject.toml           Ruff formatter settings
 src/data/load_data.py         parse ml-1m (:: separated)
 src/summarize_data.py               dataset characterisation + plots
 src/split_data.py             temporal train/val/test + user filtering
