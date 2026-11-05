@@ -8,7 +8,7 @@ import time
 from pathlib import Path
 
 
-def setup_logging(out_dir: Path):
+def _setup_logging(out_dir: Path):
     # The file log (results/logs/run.log) is committed, so it must be reproducible:
     # no timestamps and no wall-clock durations, so it only changes when results/code change.
     # The console keeps timestamps.
@@ -29,7 +29,7 @@ def main():
     args = ap.parse_args()
 
     out_dir = Path(args.out)
-    setup_logging(out_dir)
+    _setup_logging(out_dir)
     log = logging.getLogger("run_all")
 
     data_dir = Path(args.data_dir)

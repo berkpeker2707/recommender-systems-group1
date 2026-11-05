@@ -12,7 +12,7 @@ import pandas as pd
 ENCODING = "latin-1"
 
 
-def read_dat_file(path: Path, columns: list[str]) -> pd.DataFrame:
+def _read_dat_file(path: Path, columns: list[str]) -> pd.DataFrame:
     with open(path, encoding=ENCODING) as f:
         rows = [line.rstrip("\n").split("::") for line in f if line.strip()]
     malformed_rows = [row for row in rows if len(row) != len(columns)]
@@ -22,14 +22,14 @@ def read_dat_file(path: Path, columns: list[str]) -> pd.DataFrame:
 
 
 def load_ratings(data_dir) -> pd.DataFrame:
-    ratings = read_dat_file(Path(data_dir) / "ratings.dat", ["user_id", "movie_id", "rating", "unix_time"])
+    ratings = _read_dat_file(Path(data_dir) / "ratings.dat", ["user_id", "movie_id", "rating", "unix_time"])
     ratings = ratings.astype({"user_id": "int32", "movie_id": "int32", "rating": "int8", "unix_time": "int64"})
     ratings["rated_at"] = pd.to_datetime(ratings["unix_time"], unit="s")
     return ratings
 
 
 def load_movies(data_dir) -> pd.DataFrame:
-    movies = read_dat_file(Path(data_dir) / "movies.dat", ["movie_id", "title", "genres"])
+    movies = _read_dat_file(Path(data_dir) / "movies.dat", ["movie_id", "title", "genres"])
     movies["movie_id"] = movies["movie_id"].astype("int32")
     # Part 2-3: content-based models and re-ranking need the year and the genre list
     # movies["year"] = movies["title"].str.extract(r"\((\d{4})\)\s*$")[0].astype("Int16")

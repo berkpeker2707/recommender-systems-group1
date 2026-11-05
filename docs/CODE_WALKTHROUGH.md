@@ -35,7 +35,7 @@ Python runs [run_all.py](../run_all.py), starting from the bottom of the file:
 run_all.py
  └─ main()
      ├─ argparse            → reads "--data-dir data/ml-1m"
-     ├─ setup_logging()     → sets up writing to the screen AND to results/logs/run.log
+     ├─ _setup_logging()     → sets up writing to the screen AND to results/logs/run.log
      ├─ file check          → do ratings.dat and movies.dat exist? If not, print an error and exit
      └─ run_part1(data_dir, out_dir)  → THE REAL WORK STARTS HERE
 ```
@@ -63,11 +63,11 @@ ratings = add_matrix_indices(ratings, id_mappings)
 
 **→ [src/data/load_data.py](../src/data/load_data.py)**
 
-1. `load_ratings()` calls `read_dat_file()`. Every line in `ratings.dat` looks like this:
+1. `load_ratings()` calls `_read_dat_file()`. Every line in `ratings.dat` looks like this:
    ```
    1::1193::5::978300760
    ```
-   `read_dat_file` splits the line at `::`, and the result becomes a table (a pandas DataFrame):
+   `_read_dat_file` splits the line at `::`, and the result becomes a table (a pandas DataFrame):
 
    | user_id | movie_id | rating | unix_time | rated_at |
    |---|---|---|---|---|
@@ -121,14 +121,14 @@ stats = summarize_data(ratings, id_mappings.n_movies, ...)
 always land on the same side. Otherwise we could see one and predict the other, which would be a small case of "seeing the future".
 
 **→ [src/summarize_data.py](../src/summarize_data.py) `run()`**: It doesn't affect any model; it only produces material for the report.
-- `dataset_stats()` → user and movie counts, density (4.47%), long-tail shares
-- `split_stats()` → how many users in val and test never appear in train ("new users")
-- `plot_all()` → draws 4 figures into `results/figures/`
+- `_dataset_stats()` → user and movie counts, density (4.47%), long-tail shares
+- `_split_stats()` → how many users in val and test never appear in train ("new users")
+- `_plot_all()` → draws 4 figures into `results/figures/`
 - Writes the results to `results/eda_stats.json`
 
 ---
 
-### STEP 3 — Set up two "exam settings": `evaluation_settings` and `evaluate_fitted_model` ([run_part1.py](../src/experiments/run_part1.py), [91-97](../src/experiments/run_part1.py))
+### STEP 3 — Set up two "exam settings": `evaluation_settings` and `_evaluate_fitted_model` ([run_part1.py](../src/experiments/run_part1.py), [91-97](../src/experiments/run_part1.py))
 
 We have two exam settings:
 
@@ -137,7 +137,7 @@ We have two exam settings:
 | `"val"` | train | val | Choosing settings (tuning) |
 | `"test"` | train + val | test | The final, real result (once) |
 
-The `evaluation_settings` dictionary holds both pairs. Every time a model is scored, the function `evaluate_fitted_model()` prepares 3 things:
+The `evaluation_settings` dictionary holds both pairs. Every time a model is scored, the function `_evaluate_fitted_model()` prepares 3 things:
 
 1. **`seen_movies = build_user_movie_matrix(...)`** → [split_data.py](../src/split_data.py) `build_user_movie_matrix()`.
    Builds the user × movie table: 1 if the user rated the movie, 0 if not.
@@ -165,7 +165,7 @@ The `evaluation_settings` dictionary holds both pairs. Every time a model is sco
    {0: {12, 340, 2001}, 1: {5, 77}, ...}
    ```
 
-`evaluate_fitted_model()` then hands these and the model to `evaluate_model()` (explained in step 4).
+`_evaluate_fitted_model()` then hands these and the model to `evaluate_model()` (explained in step 4).
 
 ---
 
@@ -173,9 +173,9 @@ The `evaluation_settings` dictionary holds both pairs. Every time a model is sco
 
 ```python
 for setting_name, (training_ratings, evaluation_ratings) in evaluation_settings.items():
-    for model in create_most_popular_models():        # 3 variants
+    for model in _create_most_popular_models():        # 3 variants
         model.fit(training_ratings, ...)              # train
-        summary, per_user = evaluate_fitted_model(model, training_ratings, evaluation_ratings, id_mappings)  # test
+        summary, per_user = _evaluate_fitted_model(model, training_ratings, evaluation_ratings, id_mappings)  # test
         save_result(model, setting_name, summary, per_user)  # save the result
 ```
 
@@ -194,12 +194,12 @@ The 3 variants use the same code with different settings ([config.py](../config.
 
 `score()` gives everyone **the same scores**; there is no personalisation.
 
-#### 4b. `evaluate_fitted_model()` → `evaluate_model()` → [src/evaluation/evaluate_model.py](../src/evaluation/evaluate_model.py)
+#### 4b. `_evaluate_fitted_model()` → `evaluate_model()` → [src/evaluation/evaluate_model.py](../src/evaluation/evaluate_model.py)
 This function is the heart of the project. **Every model is evaluated by the same function**, which keeps the comparison fair.
 
 ```
 evaluate_model()
- ├─ recommend_top_movies()                    → pick 10 movies for each user
+ ├─ _recommend_top_movies()                    → pick 10 movies for each user
  │   ├─ model.score(users)     → [user × movie] score table (higher = better)
  │   ├─ -∞ for watched movies  → a movie they already watched can never be picked
  │   └─ sort with argsort, take the first 10
@@ -239,7 +239,7 @@ so the results come out exactly the same on every run.
 for similarity_measure in ["cosine", "jaccard", "adjusted_cosine"]:
     for n_neighbors in [10, 20, 50, 100, 200]:
         model = ItemKNN(n_neighbors, similarity_measure).fit(train_ratings, ...)
-        summary, per_user = evaluate_fitted_model(model, train_ratings, validation_ratings, id_mappings)
+        summary, per_user = _evaluate_fitted_model(model, train_ratings, validation_ratings, id_mappings)
         tuning_rows.append(...)
 best_settings = tuning_results.loc[tuning_results[ndcg_column].idxmax()]              # pick the highest NDCG
 ```
@@ -250,7 +250,7 @@ best_settings = tuning_results.loc[tuning_results[ndcg_column].idxmax()]        
 
 The idea: *"Most people who watched Aladdin also watched The Lion King. So recommend The Lion King to someone who watched Aladdin."*
 
-**1) `compute_movie_similarity()` — how similar is each pair of movies?**
+**1) `_compute_movie_similarity()` — how similar is each pair of movies?**
 - `X.T @ X` → `co[A, B]` = the number of people who watched both A and B
 - Example: 3 people watched A, 3 people watched B, and 2 people watched both.
   - **cosine** = 2 / √(3·3) = 0.67
@@ -259,7 +259,7 @@ The idea: *"Most people who watched Aladdin also watched The Lion King. So recom
     from their ratings, so a generous user who always gives 5 and a harsh user who always gives 2 end up on the same scale.
 - The result is a 3883 × 3883 table. A movie's similarity with itself is set to 0 (the diagonal).
 
-**2) `keep_nearest_neighbors()` — keep only the `k` most similar movies for each movie.**
+**2) `_keep_nearest_neighbors()` — keep only the `k` most similar movies for each movie.**
 With k=50, each movie keeps its 50 nearest neighbours and the rest become 0. Negative similarities are dropped too.
 This reduces noise and speeds things up. Tuning tells us which `k` is best.
 
@@ -284,7 +284,7 @@ This score table goes to `evaluate_model()`, and from there on everything is **e
 
 ```python
 best_knn = ItemKNN(50, "adjusted_cosine").fit(train_and_validation_ratings, ...)
-summary, per_user = evaluate_fitted_model(best_knn, train_and_validation_ratings, test_ratings, id_mappings)
+summary, per_user = _evaluate_fitted_model(best_knn, train_and_validation_ratings, test_ratings, id_mappings)
 ```
 The winning setting is retrained on **train + val** (more data, and more recent) and goes into the test
 **once**. Looking at the test results and changing the settings is forbidden.
@@ -304,7 +304,7 @@ The code that keeps rows from other parts is commented out until Part 2.
 
 The question: would the results change if we chose 1 or 20 instead of the "5 ratings" threshold?
 - The models are **not retrained.** Only the list of users taking the exam changes, because
-  `evaluate_fitted_model()` is called again with `min_user_ratings` set to 1 and 20.
+  `_evaluate_fitted_model()` is called again with `min_user_ratings` set to 1 and 20.
 - The result is written to `results/part1_sensitivity.csv`.
 - Finding: a threshold of 20 lowers the popularity scores by about 0.005. That is very close to the gap between kNN and popularity (≈0.007). The report must say this honestly.
 
@@ -315,25 +315,25 @@ The question: would the results change if we chose 1 or 20 instead of the "5 rat
 ```
 run_all.py  main()
 ├─ src/experiments/run_part1.py  run()
-│  ├─ src/data/load_data.py         load_ratings → read_dat_file
-│  │                           load_movies  → read_dat_file
+│  ├─ src/data/load_data.py         load_ratings → _read_dat_file
+│  │                           load_movies  → _read_dat_file
 │  │                           build_id_mappings, add_matrix_indices
 │  ├─ src/split_data.py             split_ratings_by_time
-│  ├─ src/summarize_data.py               run → dataset_stats, split_stats, plot_all (+ top_share)
+│  ├─ src/summarize_data.py               run → _dataset_stats, _split_stats, _plot_all (+ _top_share)
 │  ├─ POPULARITY (val + test, 3 variants)
 │  │   ├─ src/models/most_popular.py   MostPopular.fit
-│  │   └─ evaluate_fitted_model → split.select_users_to_evaluate, split.find_relevant_movies, split.build_user_movie_matrix
+│  │   └─ _evaluate_fitted_model → split.select_users_to_evaluate, split.find_relevant_movies, split.build_user_movie_matrix
 │  │                  → src/evaluation/evaluate_model.py evaluate
-│  │                      ├─ recommend_top_movies → MostPopular.score
+│  │                      ├─ _recommend_top_movies → MostPopular.score
 │  │                      └─ src/evaluation/metrics.py  precision/recall/ndcg_at_k, catalogue_coverage
 │  │      record → src/evaluation/confidence_interval.py mean_with_confidence_interval, src/save_results.py build_result_row
 │  ├─ ITEM-kNN TUNING (val, 15 trials)
-│  │   ├─ src/models/item_knn.py   ItemKNN.fit → compute_movie_similarity → split.build_user_movie_matrix
-│  │   │                                       → keep_nearest_neighbors
-│  │   └─ evaluate_fitted_model → evaluate → recommend_top_movies → ItemKNN.score → metrics…
-│  ├─ ITEM-kNN TEST (once)         ItemKNN.fit, evaluate_fitted_model
+│  │   ├─ src/models/item_knn.py   ItemKNN.fit → _compute_movie_similarity → split.build_user_movie_matrix
+│  │   │                                       → _keep_nearest_neighbors
+│  │   └─ _evaluate_fitted_model → evaluate → _recommend_top_movies → ItemKNN.score → metrics…
+│  ├─ ITEM-kNN TEST (once)         ItemKNN.fit, _evaluate_fitted_model
 │  ├─ src/save_results.py               save_results_csv → results/results.csv
-│  └─ SENSITIVITY                  evaluate_fitted_model with min_user_ratings = 5, 1, 20
+│  └─ SENSITIVITY                  _evaluate_fitted_model with min_user_ratings = 5, 1, 20
 ```
 
 ---
@@ -357,10 +357,10 @@ That means:
 |---|---|---|
 | `results/results.csv` | `save_results_csv` | Metrics for each model × val/test |
 | `results/eda_stats.json` | `summarize_data` | Data statistics, split sizes, cut dates |
-| `results/figures/` data plots | `summarize_data.plot_all` | 4 figures: long tail (items, users), rating distribution, activity over time |
+| `results/figures/` data plots | `summarize_data._plot_all` | 4 figures: long tail (items, users), rating distribution, activity over time |
 | `results/part1_item_knn_grid.csv` | `run_part1` step 5 | All 15 tuning trials |
 | `results/part1_sensitivity.csv` | `run_part1` step 8 | Comparison of thresholds 1/5/20 |
-| `results/logs/run.log` | `run_all.setup_logging` | Everything you see on the screen |
+| `results/logs/run.log` | `run_all._setup_logging` | Everything you see on the screen |
 
 ---
 

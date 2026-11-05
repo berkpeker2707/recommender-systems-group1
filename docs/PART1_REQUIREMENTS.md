@@ -40,9 +40,9 @@ justify every decision from the lectures.
 
 **In the code:**
 - Reading the files: [load_data.py](../src/data/load_data.py) → `load_ratings`, `load_movies` (turn the `::` separated lines into tables)
-- All the numbers: [summarize_data.py](../src/summarize_data.py) `dataset_stats()`
-  - "What share do the top 20% get": [summarize_data.py](../src/summarize_data.py) `top_share()`
-- The plots: [summarize_data.py](../src/summarize_data.py) `plot_all()`
+- All the numbers: [summarize_data.py](../src/summarize_data.py) `_dataset_stats()`
+  - "What share do the top 20% get": [summarize_data.py](../src/summarize_data.py) `_top_share()`
+- The plots: [summarize_data.py](../src/summarize_data.py) `_plot_all()`
 - Where this step is called: [run_part1.py](../src/experiments/run_part1.py) `summarize_data(...)`
 
 **Where the result is:** `results/eda_stats.json`, and in `results/figures/` the plots `long_tail_items.png`, `long_tail_users.png`,
@@ -82,7 +82,7 @@ justify every decision from the lectures.
 - The split itself: [split_data.py](../src/split_data.py) `split_ratings_by_time()`. Two ratings from the same second always land on the same side.
 - The filter threshold: [config.py](../config.py) `MIN_USER_RATINGS_IN_TRAINING = 5`
 - The filtering and the count of who was removed and why: [split_data.py](../src/split_data.py) `select_users_to_evaluate()`
-- Split statistics (new vs known users): [summarize_data.py](../src/summarize_data.py) `split_stats()`
+- Split statistics (new vs known users): [summarize_data.py](../src/summarize_data.py) `_split_stats()`
 - Where these are called: [run_part1.py](../src/experiments/run_part1.py) and [run_part1.py](../src/experiments/run_part1.py)
 
 **Where the result is:** The cut dates and split sizes are in `results/eda_stats.json` (`split_cuts`, `split`) and in the
@@ -107,8 +107,8 @@ justify every decision from the lectures.
 
 **In the code:**
 - The values tried: [config.py](../config.py) `ITEM_KNN_NEIGHBOR_COUNTS`, `ITEM_KNN_SIMILARITY_MEASURES`
-- The similarity calculation (formulas of the 3 measures): [item_knn.py](../src/models/item_knn.py) `compute_movie_similarity()`
-- Keeping the k nearest neighbours: [item_knn.py](../src/models/item_knn.py) `keep_nearest_neighbors()`
+- The similarity calculation (formulas of the 3 measures): [item_knn.py](../src/models/item_knn.py) `_compute_movie_similarity()`
+- Keeping the k nearest neighbours: [item_knn.py](../src/models/item_knn.py) `_keep_nearest_neighbors()`
 - Scoring for a user: [item_knn.py](../src/models/item_knn.py) `score()`. For each candidate movie, it adds up the similarities to the movies the user watched.
 - The loop over the 15 trials and picking the winner: [run_part1.py](../src/experiments/run_part1.py)
 - Testing the winner: [run_part1.py](../src/experiments/run_part1.py)
@@ -165,7 +165,7 @@ To show the metrics are calculated correctly, we wrote the example from Lecture 
 
 **In the code:**
 - The formulas of the 4 metrics: [metrics.py](../src/evaluation/metrics.py) → `precision_at_k` (line 15), `recall_at_k` (line 19), `ndcg_at_k` (line 25), `catalogue_coverage` (line 32)
-- Ranking over the full catalogue and removing watched movies: [evaluate_model.py](../src/evaluation/evaluate_model.py) `recommend_top_movies()`. It gives watched movies a score of -∞.
+- Ranking over the full catalogue and removing watched movies: [evaluate_model.py](../src/evaluation/evaluate_model.py) `_recommend_top_movies()`. It gives watched movies a score of -∞.
 - Computing the metrics for each user: [evaluate_model.py](../src/evaluation/evaluate_model.py) `evaluate_model()`
 - "A hit" = 4–5 stars: [config.py](../config.py) `RELEVANT_RATING_THRESHOLD`, [split_data.py](../src/split_data.py) `find_relevant_movies()`
 - The slide 8 test: [tests/test_metrics.py](../tests/test_metrics.py). To run it: `python -m pytest tests -q`
@@ -212,7 +212,7 @@ All of these decisions are in [config.py](../config.py) with comments. Summary t
 
 The brief also asks these questions:
 - **How extreme is the long tail?** → The numbers in item 1.
-- **What does the burstiness of the timestamps do to the split?** → Validation is shorter than a month, and 611 of its 1,134 users are not in train at all. Numbers: [summarize_data.py](../src/summarize_data.py) `split_stats()`
+- **What does the burstiness of the timestamps do to the split?** → Validation is shorter than a month, and 611 of its 1,134 users are not in train at all. Numbers: [summarize_data.py](../src/summarize_data.py) `_split_stats()`
 - **Did the filtering threshold change the results by more than the gap between the baselines?** → About the same size.
   With a threshold of 20, popularity changes by ≈0.005; the gap between kNN and popularity is ≈0.007.
   Code: [run_part1.py](../src/experiments/run_part1.py). Result: `results/part1_sensitivity.csv`.

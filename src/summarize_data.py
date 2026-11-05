@@ -12,13 +12,13 @@ import numpy as np
 import pandas as pd
 
 
-def top_share(counts, top_frac: float) -> float:
+def _top_share(counts, top_frac: float) -> float:
     """Share of all interactions collected by the top `top_frac` of entities."""
     c = np.sort(np.asarray(counts))[::-1]
     return float(c[: max(1, int(round(top_frac * len(c))))].sum() / c.sum())
 
 
-def dataset_stats(ratings: pd.DataFrame, n_catalogue: int, threshold: int) -> dict:
+def _dataset_stats(ratings: pd.DataFrame, n_catalogue: int, threshold: int) -> dict:
     per_user = ratings.groupby("user_id").size()
     per_item = ratings.groupby("movie_id").size()
     # never-rated catalogue items count as 0 (they are part of the long tail)
@@ -36,7 +36,7 @@ def dataset_stats(ratings: pd.DataFrame, n_catalogue: int, threshold: int) -> di
                      "mean": float(per_user.mean()), "max": int(per_user.max())},
         "per_item": {"min": int(per_item.min()), "median": float(per_item.median()),
                      "mean": float(per_item.mean()), "max": int(per_item.max())},
-        "top20pct_items_share": top_share(item_counts, 0.20),
+        "top20pct_items_share": _top_share(item_counts, 0.20),
         "items_lt20_ratings_pct": float((item_counts < 20).mean()),
         "rating_dist": {int(k): int(v) for k, v in ratings["rating"].value_counts().sort_index().items()},
         "positive_share": float((ratings["rating"] >= threshold).mean()),
@@ -46,7 +46,7 @@ def dataset_stats(ratings: pd.DataFrame, n_catalogue: int, threshold: int) -> di
     }
 
 
-def split_stats(train, val, test) -> dict:
+def _split_stats(train, val, test) -> dict:
     """How the bursty timestamps shape the split: who is in val/test and are they known?"""
     train_users, train_items = set(train["user_id"]), set(train["movie_id"])
     out = {}
@@ -63,7 +63,7 @@ def split_stats(train, val, test) -> dict:
     return out
 
 
-def plot_all(ratings: pd.DataFrame, n_catalogue: int, fig_dir: Path, cut_times=()):
+def _plot_all(ratings: pd.DataFrame, n_catalogue: int, fig_dir: Path, cut_times=()):
     fig_dir.mkdir(parents=True, exist_ok=True)
 
     per_item = ratings.groupby("movie_id").size().to_numpy()
@@ -114,14 +114,14 @@ def plot_all(ratings: pd.DataFrame, n_catalogue: int, fig_dir: Path, cut_times=(
 
 
 def summarize_data(ratings, n_catalogue, threshold, out_dir: Path, splits=None, split_info=None) -> dict:
-    stats = dataset_stats(ratings, n_catalogue, threshold)
+    stats = _dataset_stats(ratings, n_catalogue, threshold)
     cuts = ()
     if splits is not None:
-        stats["split"] = split_stats(*splits)
+        stats["split"] = _split_stats(*splits)
     if split_info is not None:
         stats["split_cuts"] = split_info
         cuts = ((split_info["t1"], "train|val"), (split_info["t2"], "val|test"))
-    plot_all(ratings, n_catalogue, out_dir / "figures", cuts)
+    _plot_all(ratings, n_catalogue, out_dir / "figures", cuts)
     with open(out_dir / "eda_stats.json", "w") as f:
         json.dump(stats, f, indent=2)
     return stats

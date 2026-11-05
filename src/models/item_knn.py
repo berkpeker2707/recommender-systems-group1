@@ -15,12 +15,12 @@ import scipy.sparse as sp
 from src.split_data import build_user_movie_matrix
 
 
-def cosine_from_dot_products(dot_products: np.ndarray) -> np.ndarray:
+def _cosine_from_dot_products(dot_products: np.ndarray) -> np.ndarray:
     norm = np.sqrt(np.diag(dot_products))
     return dot_products / np.maximum(np.outer(norm, norm), 1e-12)
 
 
-def compute_movie_similarity(
+def _compute_movie_similarity(
     training_ratings: pd.DataFrame, n_users: int, n_movies: int, similarity_measure: str
 ) -> np.ndarray:
     """Dense movie x movie similarity, zero diagonal."""
@@ -29,7 +29,7 @@ def compute_movie_similarity(
     match similarity_measure:
         case "cosine":
             # binary ratings, so the dot product is just the co-rating count
-            similarity = cosine_from_dot_products((rated_matrix.T @ rated_matrix).toarray())
+            similarity = _cosine_from_dot_products((rated_matrix.T @ rated_matrix).toarray())
         case "jaccard":
             rated_both_counts = (rated_matrix.T @ rated_matrix).toarray()
             rating_counts = np.diag(rated_both_counts)
@@ -42,7 +42,7 @@ def compute_movie_similarity(
             user_means = np.asarray(rating_matrix.sum(axis=1)).ravel() / np.maximum(ratings_per_user, 1)
             centered_ratings = rating_matrix.copy()
             centered_ratings.data = centered_ratings.data - np.repeat(user_means, ratings_per_user).astype(np.float32)
-            similarity = cosine_from_dot_products((centered_ratings.T @ centered_ratings).toarray())
+            similarity = _cosine_from_dot_products((centered_ratings.T @ centered_ratings).toarray())
         case _:
             raise ValueError(f"unknown similarity {similarity_measure!r}")
 
@@ -50,7 +50,7 @@ def compute_movie_similarity(
     return similarity.astype(np.float32)
 
 
-def keep_nearest_neighbors(similarity: np.ndarray, n_neighbors: int) -> sp.csr_matrix:
+def _keep_nearest_neighbors(similarity: np.ndarray, n_neighbors: int) -> sp.csr_matrix:
     """Row i keeps the n_neighbors largest positive entries, i.e. the neighbours of movie i."""
     n_movies = similarity.shape[0]
     n_neighbors = min(n_neighbors, n_movies - 1)
@@ -74,8 +74,8 @@ class ItemKNN:  # Part 2: ItemKNN(Recommender)
         self.name = f"item_knn_{self.similarity_measure}_k{self.n_neighbors}"
 
     def fit(self, training_ratings: pd.DataFrame, n_users: int, n_movies: int) -> Self:
-        similarity = compute_movie_similarity(training_ratings, n_users, n_movies, self.similarity_measure)
-        self.neighbor_similarity = keep_nearest_neighbors(similarity, self.n_neighbors)
+        similarity = _compute_movie_similarity(training_ratings, n_users, n_movies, self.similarity_measure)
+        self.neighbor_similarity = _keep_nearest_neighbors(similarity, self.n_neighbors)
         self.rated_matrix = build_user_movie_matrix(training_ratings, n_users, n_movies, values="binary")
         return self
 

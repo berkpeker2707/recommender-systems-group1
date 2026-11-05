@@ -8,7 +8,7 @@ import pandas as pd
 from src.evaluation.metrics import catalogue_coverage, ndcg_at_k, precision_at_k, recall_at_k
 
 
-def recommend_top_movies(model, seen_movies, users, list_size: int):
+def _recommend_top_movies(model, seen_movies, users, list_size: int):
     scores = np.asarray(model.score(users), dtype=np.float64)
     scores[seen_movies[users].nonzero()] = -np.inf
     return np.argsort(-scores, axis=1, kind="stable")[:, :list_size]
@@ -16,7 +16,7 @@ def recommend_top_movies(model, seen_movies, users, list_size: int):
 
 def evaluate_model(model, seen_movies, relevant_movies: dict, users, list_size: int = 10):
     users = np.asarray(users)
-    recommendation_lists = recommend_top_movies(model, seen_movies, users, list_size)
+    recommendation_lists = _recommend_top_movies(model, seen_movies, users, list_size)
     rows = []
     for user_index, recommended in zip(users, recommendation_lists):
         relevant = relevant_movies[int(user_index)]
