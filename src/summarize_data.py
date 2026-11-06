@@ -1,25 +1,6 @@
 """
-eda.py — Part 1 data characterisation. Everything here becomes a table/figure in the report.
-
-Required by the brief:
-- #users, #items, #interactions, density (expect ≈ 4.5%).
-- Distribution of interactions per user and per item, with plot  -> long tail (Lecture 5.1 slide 5).
-    Plot: sorted interactions per item (log y), cumulative share curve.
-    Numbers: "top X% of items collect Y% of ratings".
-- Rating distribution (1–5 histogram); share of ratings >= 4 (our positive threshold).
-- Time span + activity over time (ratings per month).
-    Expected finding: very bursty — most ratings in 2000, long thin tail to 2003.
-    This directly affects where our temporal cut lands -> discuss in report.
-
-"Good -> excellent" ideas (brief §5 Part 1):
-- Quantify the long tail exactly (e.g. % of items with < 20 ratings).
-- Show what the bursty timestamps do to the split: users/items per split, how many test
-  users are 'old' vs 'new'  -> split_stats().
-- Check if our filtering threshold changes results more than the gap between baselines
-  (done in experiments/part1.py).
-
-Outputs: results/eda_stats.json, results/figures/{long_tail_items,long_tail_users,
-         rating_dist,activity_over_time}.png
+Describes the data: counts, density, long tail, rating distribution, activity over time, split sizes.
+Writes results/eda_stats.json and four figures to results/figures/.
 """
 import json
 from pathlib import Path
@@ -31,19 +12,19 @@ import numpy as np
 import pandas as pd
 
 
-def top_share(counts, top_frac: float) -> float:
+def _top_share(counts, top_frac: float) -> float:
     """Share of all interactions collected by the top `top_frac` of entities."""
     c = np.sort(np.asarray(counts))[::-1]
     return float(c[: max(1, int(round(top_frac * len(c))))].sum() / c.sum())
 
 
-def dataset_stats(ratings: pd.DataFrame, n_catalogue: int, threshold: int) -> dict:
-    per_user = ratings.groupby("user").size()
-    per_item = ratings.groupby("item").size()
+def _dataset_stats(ratings: pd.DataFrame, n_catalogue: int, threshold: int) -> dict:
+    per_user = ratings.groupby("user_id").size()
+    per_item = ratings.groupby("movie_id").size()
     # never-rated catalogue items count as 0 (they are part of the long tail)
     item_counts = np.concatenate([per_item.to_numpy(), np.zeros(n_catalogue - len(per_item), int)])
-    n_u, n_i = ratings["user"].nunique(), ratings["item"].nunique()
-    by_year = ratings["timestamp"].dt.year.value_counts().sort_index()
+    n_u, n_i = ratings["user_id"].nunique(), ratings["movie_id"].nunique()
+    by_year = ratings["rated_at"].dt.year.value_counts().sort_index()
     return {
         "n_users": int(n_u),
         "n_items_rated": int(n_i),
@@ -55,39 +36,39 @@ def dataset_stats(ratings: pd.DataFrame, n_catalogue: int, threshold: int) -> di
                      "mean": float(per_user.mean()), "max": int(per_user.max())},
         "per_item": {"min": int(per_item.min()), "median": float(per_item.median()),
                      "mean": float(per_item.mean()), "max": int(per_item.max())},
-        "top20pct_items_share": top_share(item_counts, 0.20),
+        "top20pct_items_share": _top_share(item_counts, 0.20),
         "items_lt20_ratings_pct": float((item_counts < 20).mean()),
         "rating_dist": {int(k): int(v) for k, v in ratings["rating"].value_counts().sort_index().items()},
         "positive_share": float((ratings["rating"] >= threshold).mean()),
-        "first_rating": str(ratings["timestamp"].min()),
-        "last_rating": str(ratings["timestamp"].max()),
+        "first_rating": str(ratings["rated_at"].min()),
+        "last_rating": str(ratings["rated_at"].max()),
         "ratings_by_year": {int(k): int(v) for k, v in by_year.items()},
     }
 
 
-def split_stats(train, val, test) -> dict:
+def _split_stats(train, val, test) -> dict:
     """How the bursty timestamps shape the split: who is in val/test and are they known?"""
-    train_users, train_items = set(train["user"]), set(train["item"])
+    train_users, train_items = set(train["user_id"]), set(train["movie_id"])
     out = {}
     for name, part in (("train", train), ("val", val), ("test", test)):
-        users, items = set(part["user"]), set(part["item"])
+        users, items = set(part["user_id"]), set(part["movie_id"])
         out[name] = {"rows": len(part), "users": len(users), "items": len(items),
                      "positive_share": float((part["rating"] >= 4).mean())}
         if name != "train":
             out[name]["users_seen_in_train"] = len(users & train_users)
             out[name]["users_new"] = len(users - train_users)
             out[name]["items_new"] = len(items - train_items)
-    tv_users = train_users | set(val["user"])
-    out["test"]["users_seen_in_train_or_val"] = len(set(test["user"]) & tv_users)
+    tv_users = train_users | set(val["user_id"])
+    out["test"]["users_seen_in_train_or_val"] = len(set(test["user_id"]) & tv_users)
     return out
 
 
-def plot_all(ratings: pd.DataFrame, n_catalogue: int, fig_dir: Path, cut_times=()):
+def _plot_all(ratings: pd.DataFrame, n_catalogue: int, fig_dir: Path, cut_times=()):
     fig_dir.mkdir(parents=True, exist_ok=True)
 
-    per_item = ratings.groupby("item").size().to_numpy()
+    per_item = ratings.groupby("movie_id").size().to_numpy()
     per_item = np.sort(np.concatenate([per_item, np.zeros(n_catalogue - len(per_item))]))[::-1]
-    per_user = np.sort(ratings.groupby("user").size().to_numpy())[::-1]
+    per_user = np.sort(ratings.groupby("user_id").size().to_numpy())[::-1]
 
     for counts, label, fname in ((per_item, "items", "long_tail_items.png"),
                                  (per_user, "users", "long_tail_users.png")):
@@ -118,7 +99,7 @@ def plot_all(ratings: pd.DataFrame, n_catalogue: int, fig_dir: Path, cut_times=(
     plt.close(fig)
 
     fig, ax = plt.subplots(figsize=(7, 3))
-    monthly = ratings.set_index("timestamp").resample("MS").size()
+    monthly = ratings.set_index("rated_at").resample("MS").size()
     ax.bar(monthly.index, monthly.to_numpy(), width=25)
     ax.set_yscale("log")
     for t, lab in cut_times:
@@ -132,15 +113,15 @@ def plot_all(ratings: pd.DataFrame, n_catalogue: int, fig_dir: Path, cut_times=(
     plt.close(fig)
 
 
-def run(ratings, n_catalogue, threshold, out_dir: Path, splits=None, cut_info=None) -> dict:
-    stats = dataset_stats(ratings, n_catalogue, threshold)
+def summarize_data(ratings, n_catalogue, threshold, out_dir: Path, splits=None, split_info=None) -> dict:
+    stats = _dataset_stats(ratings, n_catalogue, threshold)
     cuts = ()
     if splits is not None:
-        stats["split"] = split_stats(*splits)
-    if cut_info is not None:
-        stats["split_cuts"] = cut_info
-        cuts = ((cut_info["t1"], "train|val"), (cut_info["t2"], "val|test"))
-    plot_all(ratings, n_catalogue, out_dir / "figures", cuts)
+        stats["split"] = _split_stats(*splits)
+    if split_info is not None:
+        stats["split_cuts"] = split_info
+        cuts = ((split_info["t1"], "train|val"), (split_info["t2"], "val|test"))
+    _plot_all(ratings, n_catalogue, out_dir / "figures", cuts)
     with open(out_dir / "eda_stats.json", "w") as f:
         json.dump(stats, f, indent=2)
     return stats

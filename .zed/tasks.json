@@ -1,0 +1,17 @@
+// Run without the debugger; uses the project venv, same args as .vscode/launch.json.
+[
+  {
+    "label": "Part 1 (run_all.py)",
+    "command": "$ZED_WORKTREE_ROOT/.venv/bin/python",
+    "args": ["run_all.py", "--data-dir", "data/ml-1m"],
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "reveal": "always"
+  },
+  {
+    "label": "Metric tests (pytest)",
+    "command": "$ZED_WORKTREE_ROOT/.venv/bin/python",
+    "args": ["-m", "pytest", "tests", "-q"],
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "reveal": "always"
+  }
+]
