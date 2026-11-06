@@ -22,8 +22,12 @@ from src.summarize_data import summarize_data
 
 log = logging.getLogger(__name__)
 
-
-def evaluate_fitted_model(model, training_ratings, evaluation_ratings, id_mappings,
+# take a  model that is already trained and give it a score
+# model a trained "most popular" or "item-kNN" model
+# evaluation_ratings the ratings to evaluate on (validation or test)
+# training_ratings the ratings to use for building the user-movie matrix of seen movies
+# min_user_ratings the minimum number of ratings a user must have in training_ratings to be evaluated on evaluation_ratings, by default 5
+def _evaluate_fitted_model(model, training_ratings, evaluation_ratings, id_mappings,
                           min_user_ratings=config.MIN_USER_RATINGS_IN_TRAINING):
     """Score a fitted model on evaluation_ratings, for users with >= min_user_ratings in training_ratings."""
     users, _ = select_users_to_evaluate(training_ratings, evaluation_ratings, min_user_ratings,
@@ -32,13 +36,17 @@ def evaluate_fitted_model(model, training_ratings, evaluation_ratings, id_mappin
     seen_movies = build_user_movie_matrix(training_ratings, id_mappings.n_users, id_mappings.n_movies, values="binary")
     return evaluate_model(model, seen_movies, relevant_movies, users, config.RECOMMENDATION_LIST_SIZE)
 
-
-def create_most_popular_models():
+# returns a list of MostPopular models with different settings, as specified in config.MOST_POPULAR_VARIANTS
+# example:
+# [MostPopular("pop_alltime_count", None, False, 4),
+# MostPopular("pop_alltime_positive", None, True, 4),
+# MostPopular("pop_recent90_count", 90, False, 4)]
+def _create_most_popular_models():
     return [MostPopular(name, window_days, positives_only, config.RELEVANT_RATING_THRESHOLD)
             for name, (window_days, positives_only) in config.MOST_POPULAR_VARIANTS.items()]
 
-
-def format_metrics(summary):
+# format for logging the metrics in a single line, nothing else
+def _format_metrics(summary):
     return ("P@10={precision@10:.4f} R@10={recall@10:.4f} NDCG@10={ndcg@10:.4f} "
             "cov={coverage@10:.3f} users={n_users}").format(**summary)
 
@@ -50,8 +58,8 @@ def run_part1(data_dir, out_dir):
     # first element is the top-1 recommendation, second is top-2, etc.
     list_size = config.RECOMMENDATION_LIST_SIZE
 
-    # normalized discounted cumulative gaini. it means how many films the user has seen in the top-k recommendations, weighted by their position in the list
-    # if they are down, the score is lower. the score is normalized by the ideal scoreç
+    # normalized discounted cumulative gain. it counts how many movies the user liked (rated 4-5) are in the top-k recommendations, weighted by their position in the list
+    # if they are lower in the list, the score is lower. the score is normalized by the ideal score
     ndcg_column = f"ndcg@{list_size}"
 
     # section 1 - data
@@ -90,13 +98,13 @@ def run_part1(data_dir, out_dir):
     def save_result(model, setting_name, summary, per_user):
         mean, interval = mean_with_confidence_interval(per_user[ndcg_column])
         result_rows.append(build_result_row(1, model, setting_name, config.SEED, summary, interval))
-        log.info("[%s] %-32s %s ±%.4f", setting_name, model.name, format_metrics(summary), interval)
+        log.info("[%s] %-32s %s ±%.4f", setting_name, model.name, _format_metrics(summary), interval)
 
     # section 3 - most popular
     for setting_name, (training_ratings, evaluation_ratings) in evaluation_settings.items():
-        for model in create_most_popular_models():
+        for model in _create_most_popular_models():
             model.fit(training_ratings, id_mappings.n_users, id_mappings.n_movies)
-            summary, per_user = evaluate_fitted_model(model, training_ratings, evaluation_ratings, id_mappings)
+            summary, per_user = _evaluate_fitted_model(model, training_ratings, evaluation_ratings, id_mappings)
             save_result(model, setting_name, summary, per_user)
 
     # section 4 - item-kNN: choose the settings on validation, then evaluate once on test
@@ -104,7 +112,7 @@ def run_part1(data_dir, out_dir):
     for similarity_measure in config.ITEM_KNN_SIMILARITY_MEASURES:
         for n_neighbors in config.ITEM_KNN_NEIGHBOR_COUNTS:
             model = ItemKNN(n_neighbors, similarity_measure).fit(train_ratings, id_mappings.n_users, id_mappings.n_movies)
-            summary, per_user = evaluate_fitted_model(model, train_ratings, validation_ratings, id_mappings)
+            summary, per_user = _evaluate_fitted_model(model, train_ratings, validation_ratings, id_mappings)
             save_result(model, "val", summary, per_user)
             tuning_rows.append({"similarity": similarity_measure, "k": n_neighbors, **summary})
     tuning_results = pd.DataFrame(tuning_rows)
@@ -116,19 +124,19 @@ def run_part1(data_dir, out_dir):
     best_knn = ItemKNN(int(best_settings["k"]), best_settings["similarity"]).fit(
         train_and_validation_ratings, id_mappings.n_users, id_mappings.n_movies)
     best_knn.name = "item_knn"
-    summary, per_user = evaluate_fitted_model(best_knn, train_and_validation_ratings, test_ratings, id_mappings)
+    summary, per_user = _evaluate_fitted_model(best_knn, train_and_validation_ratings, test_ratings, id_mappings)
     save_result(best_knn, "test", summary, per_user)
 
     save_results_csv(result_rows, out_dir / "results.csv", part=1)
 
     # section 5 - does the user filter change the results?
     sensitivity_rows = []
-    most_popular_models = create_most_popular_models()
+    most_popular_models = _create_most_popular_models()
     for model in most_popular_models:
         model.fit(train_and_validation_ratings, id_mappings.n_users, id_mappings.n_movies)
     for min_user_ratings in [config.MIN_USER_RATINGS_IN_TRAINING] + config.SENSITIVITY_MIN_USER_RATINGS:
         for model in most_popular_models + [best_knn]:
-            summary, _ = evaluate_fitted_model(model, train_and_validation_ratings, test_ratings, id_mappings,
+            summary, _ = _evaluate_fitted_model(model, train_and_validation_ratings, test_ratings, id_mappings,
                                                min_user_ratings)
             sensitivity_rows.append({"min_train": min_user_ratings, "model": model.name, **summary})
     sensitivity_results = pd.DataFrame(sensitivity_rows)

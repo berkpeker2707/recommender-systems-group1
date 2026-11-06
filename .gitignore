@@ -1,5 +1,4 @@
 # MovieLens is never committed (GroupLens usage terms)
-data/*
 !data/.gitkeep
 .venv/
 __pycache__/

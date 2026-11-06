@@ -1,7 +1,6 @@
 # Recommender Systems Course Project — Group 1
 
 > STATUS: Part 1 implemented. To reproduce it, see "Quick start" below.
-> What the project is about, what each part requires, and the options for Parts 2–3: `docs/PROJECT_OVERVIEW.md`.
 > Decisions and open questions: `docs/PLAN.md`.
 
 Part 1: data characterisation, temporal evaluation protocol and two baselines (Most Popular,
@@ -10,19 +9,18 @@ Report and results workbook: `results/(Group 1) Recommender_Systems_*` · Team: 
 
 ## Quick start: reproduce everything
 
-**1. Get the data.** MovieLens 1M is not included in this repository (GroupLens usage terms).
-Download `ml-1m.zip` from https://grouplens.org/datasets/movielens/1m/ and unzip it anywhere.
-The folder must contain `ratings.dat` and `movies.dat`.
+**1. The data.** MovieLens 1M is included in `data/ml-1m/` (from https://grouplens.org/datasets/movielens/1m/).
+The program reads it from there by default.
 
-**2. Run one command** from the repository folder, with the path to that unzipped folder:
+**2. Run one command** from the repository folder:
 
 ```bash
-uv run --python 3.11 --with-requirements requirements.txt run_all.py --data-dir /path/to/ml-1m
+uv run --python 3.11 --with-requirements requirements.txt run_all.py
 ```
 
 This single command downloads Python 3.11 if needed, installs the exact package versions from
-`requirements.txt` into a temporary environment, and runs the whole project. It works the same on
-macOS, Linux and Windows. The first run takes about a minute (downloads), later runs about 30 seconds.
+`requirements.txt` into a temporary environment, and runs the whole project. The first run takes about
+a minute (downloads), later runs about 20 seconds.
 It needs [uv](https://docs.astral.sh/uv/getting-started/installation/), installed with one line:
 `curl -LsSf https://astral.sh/uv/install.sh | sh` (macOS/Linux) or
 `powershell -c "irm https://astral.sh/uv/install.ps1 | iex"` (Windows).
@@ -33,7 +31,7 @@ It needs [uv](https://docs.astral.sh/uv/getting-started/installation/), installe
 python3.11 -m venv .venv
 source .venv/bin/activate          # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
-python run_all.py --data-dir /path/to/ml-1m
+python run_all.py
 ```
 
 </details>
@@ -42,8 +40,19 @@ python run_all.py --data-dir /path/to/ml-1m
 `results/part1_sensitivity.csv`, `results/figures/*.png` and `results/logs/run.log`.
 The run is deterministic, so it regenerates the committed files exactly.
 
-**Tests** (metric implementation vs. the Lecture 3.1 slide 8 example):
+**Tests** (metric implementation vs. hand-calculated examples):
 `uv run --python 3.11 --with-requirements requirements.txt -m pytest tests -q`
+
+**Code formatting** (only needed if you change the code): we use [Ruff](https://docs.astral.sh/ruff/),
+with its settings in `pyproject.toml`. Run these from the repository folder before you commit:
+
+```bash
+ruff check --select I --fix .   # sort the imports
+ruff format .                   # format all Python files
+```
+
+`ruff format --check .` only reports which files need formatting and changes nothing.
+In VS Code, the "Ruff" extension (`charliermarsh.ruff`) can format each file when you save it.
 
 ## Libraries used
 
@@ -54,8 +63,9 @@ Python 3.11.17. All versions are pinned in `requirements.txt`.
 | numpy      | 2.4.6   | Arrays and maths: counting, sorting the top 10, metric formulas                                                                     | most files in `src/`                                                                   |
 | pandas     | 3.1.0   | Tables: reading the ratings, splitting, grouping, writing CSV files                                                                 | most files in `src/`                                                                   |
 | scipy      | 1.17.1  | `scipy.sparse`: the user × movie matrix and the kNN neighbour lists. `scipy.stats`: the t-distribution for 95% confidence intervals | `src/split_data.py`, `src/models/item_knn.py`, `src/evaluation/confidence_interval.py` |
-| matplotlib | 3.11.2  | All figures                                                                                                                         | `src/summarize_data.py`, `src/plots.py`                                                |
+| matplotlib | 3.11.2  | All figures                                                                                                                         | `src/summarize_data.py`                                                                 |
 | pytest     | 9.2.0   | Unit tests only; not needed to produce the results                                                                                  | `tests/`                                                                               |
+| ruff       | 0.17.3  | Code formatting only; not needed to produce the results                                                                             | `pyproject.toml`                                                                       |
 
 Everything else (`argparse`, `logging`, `pathlib`, `json`, …) is part of Python's standard library.
 **No recommender-system library is used:** Most Popular, item-kNN, the temporal split and all metrics
@@ -63,7 +73,7 @@ are our own code.
 
 ## Results (Part 1)
 
-_Numbers from `python run_all.py`; update this section by hand if the results change._
+_Numbers from the run command in "Quick start" above; update this section by hand if the results change._
 
 ### 1. The data
 
@@ -131,14 +141,14 @@ Chosen: **adjusted cosine, k = 50** (validation NDCG@10 = 0.127).
 | model                    | ≥ 1 train ratings | ≥ 5 train ratings | ≥ 20 train ratings |
 | ------------------------ | ----------------- | ----------------- | ------------------ |
 | Item-kNN                 | 0.2183            | 0.2185            | 0.2178             |
-| Popular (all ratings)    | 0.2008            | 0.2003            | 0.1966             |
-| Popular (4–5 stars only) | 0.2121            | 0.2119            | 0.2067             |
+| Popular (all ratings)    | 0.2007            | 0.2003            | 0.1966             |
+| Popular (4–5 stars only) | 0.2121            | 0.2120            | 0.2067             |
 | Popular (last 90 days)   | 0.2022            | 0.2018            | 0.1983             |
 
 ## Reproducibility details
 
 - Seed: `SEED` in `config.py` (42).
-- Split: global temporal split, cut points in `config.py` and printed in the log.
+- Split: global temporal split; the fractions are in `config.py`, the cut dates are printed in the log.
 - Filtering thresholds, k-grid, similarity grid: `config.py`.
 - No intermediate files are needed: the split and all results are regenerated.
 
@@ -147,15 +157,16 @@ Chosen: **adjusted cosine, k = 50** (validation NDCG@10 = 0.127).
 ```
 run_all.py               single entry point
 config.py                every tunable constant (seed, split, thresholds, grids)
+pyproject.toml           Ruff formatter settings
 src/data/load_data.py         parse ml-1m (:: separated)
-src/summarize_data.py               dataset characterisation + plots
+src/summarize_data.py         dataset characterisation + plots
 src/split_data.py             temporal train/val/test + user filtering
-src/models/              Most Popular, item-kNN (base.py is commented out until Part 2)
-src/evaluation/          metrics, full-catalogue evaluator, confidence intervals
-src/experiments/run_part1.py runs the whole Part 1 pipeline
-src/save_results.py           writes results in the mandatory template schema
-tests/                   metric unit tests (worked example)
-docs/                    plan, code walkthrough, team split
+src/models/                   Most Popular, item-kNN (base.py is commented out until Part 2)
+src/evaluation/               metrics, full-catalogue evaluator, confidence intervals
+src/experiments/run_part1.py  runs the whole Part 1 pipeline
+src/save_results.py           writes results.csv (template columns plus Part, Split, CI, Users evaluated)
+tests/                        metric unit tests (worked example)
+docs/                         plan, code walkthrough
 ```
 
 ## Report ↔ output mapping
@@ -173,4 +184,4 @@ docs/                    plan, code walkthrough, team split
 
 ## Use of AI assistants
 
-Disclosed in the report (section "Use of AI"), as required by the brief.
+Disclosed in the report (section 6, "Use of AI Assistants"), as required by the assignment.
