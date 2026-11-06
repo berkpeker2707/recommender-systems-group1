@@ -88,7 +88,7 @@ The report is one document, extended in each part. You must score at least 40% o
 
 ---
 
-## 5. Part 2 — Models and honest comparison (options) !!! NEEDS REVIEW IGNORE FOR NOW !!!
+## 5. Part 2 — Models and honest comparison (options) - !!! NEEDS REVIEW IGNORE FOR NOW !!!
 
 **Goal:** add better models and compare them fairly, including where they fail.
 
@@ -164,7 +164,7 @@ It must be one of the models we report in Part 2. The brief lists these as reaso
 
 ---
 
-## 6. Part 3 — Beyond accuracy (options)
+## 6. Part 3 — Beyond accuracy (options) - !!! NEEDS REVIEW IGNORE FOR NOW !!!
 
 **Goal:** choose **one** track, implement an intervention, and measure what it costs.
 

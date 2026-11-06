@@ -22,13 +22,13 @@ We use MovieLens 1M: ratings that real people gave on a movie website. Each row 
 User 1 gave movie 1193 five stars, on 31 December 2000 at 22:12
 ```
 
-| Word | Meaning | How many we have |
-|---|---|---|
-| **user** | The person giving ratings | 6,040 |
-| **item** (here: a movie) | The thing being rated | 3,883 |
-| **rating** | 1–5 stars | — |
-| **interaction** | "This user did something with this movie" (for us: rated it) | 1,000,209 |
-| **timestamp** | The moment the rating was given | April 2000 – February 2003 |
+| Word                     | Meaning                                                      | How many we have           |
+| ------------------------ | ------------------------------------------------------------ | -------------------------- |
+| **user**                 | The person giving ratings                                    | 6,040                      |
+| **item** (here: a movie) | The thing being rated                                        | 3,883                      |
+| **rating**               | 1–5 stars                                                    | —                          |
+| **interaction**          | "This user did something with this movie" (for us: rated it) | 1,000,209                  |
+| **timestamp**            | The moment the rating was given                              | April 2000 – February 2003 |
 
 **In the code:** the files are read in [src/data/load_data.py](../src/data/load_data.py).
 
@@ -77,10 +77,12 @@ The plot: `results/figures/long_tail_items.png`.
 ## 5. Model, fit, score
 
 A **model** is a program that looks at data and derives a rule. It has two jobs:
+
 1. **fit (train / learn):** looks at past data and learns something, e.g. "people who watch Aladdin also watch The Lion King".
 2. **score:** gives every movie a number for a given user. The 10 highest-scoring movies become the recommendation list.
 
 We have two models:
+
 - **Most Popular:** the only thing it learns is how many times each movie was watched. It recommends the most popular movies to everyone. → [most_popular.py](../src/models/most_popular.py)
 - **Item-kNN:** learns which movies are similar to each other, then recommends movies similar to the ones you watched. → [item_knn.py](../src/models/item_knn.py)
 
@@ -108,11 +110,11 @@ Models are the same. We train a model on one part of the data and test it on ano
 
 ### Three parts
 
-| Part | Analogy | What it is for | Ours |
-|---|---|---|---|
-| **train** | The textbook | The model learns from it | 80% of the ratings |
-| **validation** | A mock exam | Used to choose settings (see section 9) | 10% |
-| **test** | The final exam | The real result. Used **only once**, at the very end | 10% |
+| Part           | Analogy        | What it is for                                       | Ours               |
+| -------------- | -------------- | ---------------------------------------------------- | ------------------ |
+| **train**      | The textbook   | The model learns from it                             | 80% of the ratings |
+| **validation** | A mock exam    | Used to choose settings (see section 9)              | 10%                |
+| **test**       | The final exam | The real result. Used **only once**, at the very end | 10%                |
 
 ### Why three parts, not two?
 
@@ -122,6 +124,7 @@ so the mock-exam score comes out a bit optimistic. For an honest final grade you
 ### Random split vs temporal split
 
 There are two ways to split:
+
 - **Random split:** shuffle the ratings and deal them out at random. The problem: the model can see a rating from 2002 and use it to predict one from 2000.
   In other words it **sees the future to predict the past**. That is impossible in real life, so the scores come out unrealistically high.
   This is called **data leakage**.
@@ -129,6 +132,7 @@ There are two ways to split:
   This is how Netflix works too: it uses yesterday's data to predict tomorrow.
 
 **We use a temporal split:**
+
 ```
 Apr 2000 ─────────────── 2 Dec 2000 ──── 29 Dec 2000 ────────── Feb 2003
           TRAIN (80%)          │   VALIDATION   │       TEST (10%)
@@ -146,6 +150,7 @@ Apr 2000 ─────────────── 2 Dec 2000 ──── 2
 ### Threshold 1: what does "liked" mean? → `RELEVANT_RATING_THRESHOLD = 4`
 
 We recommended a movie and the user rated it during the test period. Was the recommendation a hit?
+
 - They gave it 5 stars: yes, they liked it.
 - They gave it 1 star: no. They watched it and hated it, so counting it as a hit would be silly.
 - They gave it 3 stars: "not bad". Unclear.
@@ -180,6 +185,7 @@ Analogy: a cake recipe. The ingredients are the data and the cake is the model. 
 To find the best temperature you bake a few cakes and compare. That is **tuning**.
 
 Item-kNN has two hyperparameters:
+
 - **k:** how many similar movies to look at (we tried 10, 20, 50, 100, 200).
 - **similarity:** how to measure how similar two movies are (we tried cosine, Jaccard and adjusted cosine).
 
@@ -215,6 +221,7 @@ This property is called **reproducibility**.
 ### The honest situation in our project
 
 Part 1 actually has **almost no randomness**:
+
 - The temporal split cuts by date, not at random.
 - Most Popular just counts.
 - Item-kNN computes similarities with a formula.
@@ -230,12 +237,12 @@ As a result, the numbers come out exactly the same no matter how many times you 
 
 We recommended 10 movies to a user. During the test period that user gave 4–5 stars to 20 movies, and 3 of those are on our list:
 
-| Metric | Question | Example |
-|---|---|---|
-| **Precision@10** | How many of my 10 recommendations were hits? | 3/10 = **0.30** |
-| **Recall@10** | How many of the movies the user liked did I catch? | 3/20 = **0.15** |
-| **NDCG@10** | Are the hits near the top of the list? (a hit in position 1 is worth more than one in position 10) | between 0 and 1 |
-| **Coverage** | Across all users' lists, what share of the catalogue was recommended at least once? | Most Popular 3.6%, kNN 14.3% |
+| Metric           | Question                                                                                           | Example                      |
+| ---------------- | -------------------------------------------------------------------------------------------------- | ---------------------------- |
+| **Precision@10** | How many of my 10 recommendations were hits?                                                       | 3/10 = **0.30**              |
+| **Recall@10**    | How many of the movies the user liked did I catch?                                                 | 3/20 = **0.15**              |
+| **NDCG@10**      | Are the hits near the top of the list? (a hit in position 1 is worth more than one in position 10) | between 0 and 1              |
+| **Coverage**     | Across all users' lists, what share of the catalogue was recommended at least once?                | Most Popular 3.6%, kNN 14.3% |
 
 "@10" means "looking at the first 10 items of the list".
 
@@ -257,7 +264,7 @@ We also never recommend movies the user **already watched**; in the code those m
 Why not one exact number? Because we measured on only 1,154 users. With a different 1,154 users the result would come out a little different.
 Think of an election poll: "45% ± 3" means that if we asked the whole country, we would most likely get 42–48%.
 
-If the intervals of two models overlap, the difference between them might be due to chance. Lecture 3.1, slide 10 puts it this way: *"A 0.3% gain with no interval is not a result."*
+If the intervals of two models overlap, the difference between them might be due to chance. Lecture 3.1, slide 10 puts it this way: _"A 0.3% gain with no interval is not a result."_
 
 **Our result:** kNN has the highest score (0.219), but its interval overlaps with that of the best Popular variant (0.212). So we **cannot say kNN is clearly better** on accuracy. On coverage the difference is very clear: 14.3% vs 3.6%.
 
@@ -281,4 +288,4 @@ If the intervals of two models overlap, the difference between them might be due
 
 Every step here is deterministic, so each run gives the same result. The seed is the safeguard on top of that.
 
-Next: to see how this story flows through the code, read [CODE_WALKTHROUGH.md](CODE_WALKTHROUGH.md); for how each line of the brief id_mappings to our work, read [PART1_REQUIREMENTS.md](PART1_REQUIREMENTS.md).
+Next: to see how this story flows through the code, read [CODE_WALKTHROUGH.md](CODE_WALKTHROUGH.md).

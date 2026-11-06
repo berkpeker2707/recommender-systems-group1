@@ -41,6 +41,7 @@ run_all.py
 ```
 
 **Why this way?**
+
 - The brief says everything must be reproducible with one command, so there is one entry point.
 - The data path comes from the command line and is not written into the code (the teacher will use a different folder on their computer).
 
@@ -64,14 +65,16 @@ ratings = add_matrix_indices(ratings, id_mappings)
 **→ [src/data/load_data.py](../src/data/load_data.py)**
 
 1. `load_ratings()` calls `_read_dat_file()`. Every line in `ratings.dat` looks like this:
+
    ```
    1::1193::5::978300760
    ```
+
    `_read_dat_file` splits the line at `::`, and the result becomes a table (a pandas DataFrame):
 
-   | user_id | movie_id | rating | unix_time | rated_at |
-   |---|---|---|---|---|
-   | 1 | 1193 | 5 | 978300760 | 2000-12-31 22:12:40 |
+   | user_id | movie_id | rating | unix_time | rated_at            |
+   | ------- | -------- | ------ | --------- | ------------------- |
+   | 1       | 1193     | 5      | 978300760 | 2000-12-31 22:12:40 |
 
    `unix_time` is the time in seconds. `rated_at` is the same moment as a readable date.
 
@@ -83,12 +86,12 @@ ratings = add_matrix_indices(ratings, id_mappings)
    Soon we will build a "user × movie" table (a matrix). Its row and column numbers must run 0, 1, 2, 3…
    **without gaps**. These functions give every user and movie a new sequence number:
 
-   | Original | New column |
-   |---|---|
-   | user 1 → | `user_index = 0` |
-   | user 6040 → | `user_index = 6039` |
-   | movie 1 (Toy Story) → | `movie_index = 0` |
-   | movie 3952 → | `movie_index = 3882` |
+   | Original              | New column           |
+   | --------------------- | -------------------- |
+   | user 1 →              | `user_index = 0`     |
+   | user 6040 →           | `user_index = 6039`  |
+   | movie 1 (Toy Story) → | `movie_index = 0`    |
+   | movie 3952 →          | `movie_index = 3882` |
 
    From here on, `user_index` and `movie_index` are these sequence numbers, while `user_id` and `movie_id` are the original IDs.
 
@@ -111,16 +114,17 @@ stats = summarize_data(ratings, id_mappings.n_movies, ...)
 3. Finds the time at the 90% mark → `t2` = **29 December 2000**.
 4. Every rating before `t1` goes to train, those between `t1` and `t2` go to validation, and `t2` onwards goes to test.
 
-| | Rows | Users |
-|---|---|---|
+|       | Rows    | Users |
+| ----- | ------- | ----- |
 | train | 800,164 | 5,400 |
-| val | 100,024 | 1,134 |
-| test | 100,021 | 1,209 |
+| val   | 100,024 | 1,134 |
+| test  | 100,021 | 1,209 |
 
 **Why compare by time rather than cutting at a row number?** So that two ratings entered in the same second
 always land on the same side. Otherwise we could see one and predict the other, which would be a small case of "seeing the future".
 
 **→ [src/summarize_data.py](../src/summarize_data.py) `run()`**: It doesn't affect any model; it only produces material for the report.
+
 - `_dataset_stats()` → user and movie counts, density (4.47%), long-tail shares
 - `_split_stats()` → how many users in val and test never appear in train ("new users")
 - `_plot_all()` → draws 4 figures into `results/figures/`
@@ -132,21 +136,23 @@ always land on the same side. Otherwise we could see one and predict the other, 
 
 We have two exam settings:
 
-| Name | Model is trained on | Model is tested on | Purpose |
-|---|---|---|---|
-| `"val"` | train | val | Choosing settings (tuning) |
-| `"test"` | train + val | test | The final, real result (once) |
+| Name     | Model is trained on | Model is tested on | Purpose                       |
+| -------- | ------------------- | ------------------ | ----------------------------- |
+| `"val"`  | train               | val                | Choosing settings (tuning)    |
+| `"test"` | train + val         | test               | The final, real result (once) |
 
 The `evaluation_settings` dictionary holds both pairs. Every time a model is scored, the function `_evaluate_fitted_model()` prepares 3 things:
 
 1. **`seen_movies = build_user_movie_matrix(...)`** → [split_data.py](../src/split_data.py) `build_user_movie_matrix()`.
    Builds the user × movie table: 1 if the user rated the movie, 0 if not.
+
    ```
              Toy Story  Aladdin  Matrix  Titanic ...
    user 0        1         0        1       0
    user 1        0         1        1       0
    ...
    ```
+
    About 95% of the 6040 × 3883 cells are 0, so only the 1s are stored. This is called a "sparse matrix" and it
    saves a lot of memory. During evaluation this table enforces the rule "don't recommend a movie they already watched".
 
@@ -182,12 +188,16 @@ for setting_name, (training_ratings, evaluation_ratings) in evaluation_settings.
 This loop is **the same path every model follows.** Understand it once and you understand item-kNN too.
 
 #### 4a. `model.fit()` → [src/models/most_popular.py](../src/models/most_popular.py)
+
 `MostPopular.fit()` counts how many times each movie was rated (`np.bincount`). The result is a list of 3,883 numbers:
+
 ```
 counts = [2077, 701, 478, ...]   # e.g. in the full data, Toy Story 2077 times, movie 2 701 times...
                                  # (fit counts only train, so the real numbers are somewhat lower)
 ```
+
 The 3 variants use the same code with different settings ([config.py](../config.py) `MOST_POPULAR_VARIANTS`):
+
 - `pop_alltime_count` → count all ratings
 - `pop_alltime_positive` → count only the 4–5 star ratings
 - `pop_recent90_count` → count only the last 90 days of train
@@ -195,6 +205,7 @@ The 3 variants use the same code with different settings ([config.py](../config.
 `score()` gives everyone **the same scores**; there is no personalisation.
 
 #### 4b. `_evaluate_fitted_model()` → `evaluate_model()` → [src/evaluation/evaluate_model.py](../src/evaluation/evaluate_model.py)
+
 This function is the heart of the project. **Every model is evaluated by the same function**, which keeps the comparison fair.
 
 ```
@@ -212,6 +223,7 @@ evaluate_model()
 ```
 
 A simple example, for user 0:
+
 ```
 model.score  → [Toy Story: 2077, Aladdin: 900, Matrix: 1500, Titanic: 1200, ...]
 watched      → Toy Story and Matrix   → write -∞ for these
@@ -223,10 +235,12 @@ answer key {Titanic, Fargo}  → a hit in position 1!
 so the results come out exactly the same on every run.
 
 **What comes back:**
+
 - `summary` → the averages: `{"precision@10": 0.195, "ndcg@10": 0.212, "coverage@10": 0.036, "n_users": 1154}`
 - `per_user` → **each user's individual score** (needed for the confidence interval)
 
 #### 4c. `save_result()` → [run_part1.py](../src/experiments/run_part1.py)
+
 - `mean_with_confidence_interval()` → [src/evaluation/confidence_interval.py](../src/evaluation/confidence_interval.py): computes the ± confidence interval from the user scores
 - `build_result_row()` → [src/save_results.py](../src/save_results.py): turns the result into a table row and adds it to the `rows` list
 - writes a line to the log
@@ -248,9 +262,10 @@ best_settings = tuning_results.loc[tuning_results[ndcg_column].idxmax()]        
 
 #### How does item-kNN work? → [src/models/item_knn.py](../src/models/item_knn.py)
 
-The idea: *"Most people who watched Aladdin also watched The Lion King. So recommend The Lion King to someone who watched Aladdin."*
+The idea: _"Most people who watched Aladdin also watched The Lion King. So recommend The Lion King to someone who watched Aladdin."_
 
 **1) `_compute_movie_similarity()` — how similar is each pair of movies?**
+
 - `X.T @ X` → `co[A, B]` = the number of people who watched both A and B
 - Example: 3 people watched A, 3 people watched B, and 2 people watched both.
   - **cosine** = 2 / √(3·3) = 0.67
@@ -264,16 +279,20 @@ With k=50, each movie keeps its 50 nearest neighbours and the rest become 0. Neg
 This reduces noise and speeds things up. Tuning tells us which `k` is best.
 
 **3) `score()` — give the user scores.**
+
 ```python
 self.rated_matrix[user_indices] @ self.neighbor_similarity.T
 ```
+
 Meaning: for a candidate movie, add up its similarity to each movie the user watched.
+
 ```
 User watched:         Toy Story, Aladdin
 Candidate Lion King:  sim(LK, Toy Story)=0.4 + sim(LK, Aladdin)=0.6  = 1.0
 Candidate Alien:      sim(Alien, Toy Story)=0.0 + sim(Alien, Aladdin)=0.05 = 0.05
 → The Lion King ranks much higher
 ```
+
 This score table goes to `evaluate_model()`, and from there on everything is **exactly the same** as for Most Popular.
 
 **Winner:** adjusted cosine, k = 50. The whole grid is written to `results/part1_item_knn_grid.csv`.
@@ -286,6 +305,7 @@ This score table goes to `evaluate_model()`, and from there on everything is **e
 best_knn = ItemKNN(50, "adjusted_cosine").fit(train_and_validation_ratings, ...)
 summary, per_user = _evaluate_fitted_model(best_knn, train_and_validation_ratings, test_ratings, id_mappings)
 ```
+
 The winning setting is retrained on **train + val** (more data, and more recent) and goes into the test
 **once**. Looking at the test results and changing the settings is forbidden.
 
@@ -303,6 +323,7 @@ The code that keeps rows from other parts is commented out until Part 2.
 ### STEP 8 — Sensitivity check ([run_part1.py](../src/experiments/run_part1.py))
 
 The question: would the results change if we chose 1 or 20 instead of the "5 ratings" threshold?
+
 - The models are **not retrained.** Only the list of users taking the exam changes, because
   `_evaluate_fitted_model()` is called again with `min_user_ratings` set to 1 and 20.
 - The result is written to `results/part1_sensitivity.csv`.
@@ -341,11 +362,13 @@ run_all.py  main()
 ## 4. The one important design trick: everyone uses the same "plug"
 
 Every model **must be able to do two things** (the `Recommender` class in [src/models/base.py](../src/models/base.py) writes this down, but it is commented out until Part 2):
+
 - `fit(train, n_users, n_movies)` → learn
 - `score(users)` → give each user a score for each movie
 
 The rest (removing watched movies, picking the top 10, computing the metrics) is **the evaluator's job.**
 That means:
+
 - All models are evaluated in exactly the same way (a fair comparison).
 - To add a new model, you only need to write `fit` and `score`.
 
@@ -353,26 +376,11 @@ That means:
 
 ## 5. Which output comes from where?
 
-| File | Produced by | Contents |
-|---|---|---|
-| `results/results.csv` | `save_results_csv` | Metrics for each model × val/test |
-| `results/eda_stats.json` | `summarize_data` | Data statistics, split sizes, cut dates |
-| `results/figures/` data plots | `summarize_data._plot_all` | 4 figures: long tail (items, users), rating distribution, activity over time |
-| `results/part1_item_knn_grid.csv` | `run_part1` step 5 | All 15 tuning trials |
-| `results/part1_sensitivity.csv` | `run_part1` step 8 | Comparison of thresholds 1/5/20 |
-| `results/logs/run.log` | `run_all._setup_logging` | Everything you see on the screen |
-
----
-
-## 6. To understand it yourself
-
-1. **Walk through it with the debugger:** put a breakpoint on [run_part1.py](../src/experiments/run_part1.py), press F5,
-   and type `train_ratings.head()` and `split_info` in the Debug Console. Then step forward with F10.
-2. **Run the tests:** `python -m pytest tests -q` → shows that NDCG gives the same result as the example on the lecture slide.
-3. **Change something and see what happens:** set `ITEM_KNN_NEIGHBOR_COUNTS = [5, 50]` in [config.py](../config.py), run again, and see how the grid file changed.
-4. **Questions the exam may ask (you should be able to answer them):**
-   - Why a temporal split and not a random split?
-   - Why didn't we choose the winning k by looking at the test set?
-   - Why do we write -∞ for watched movies?
-   - Why is Most Popular so strong, and why is its coverage so low?
-   - How is adjusted cosine different from normal cosine?
+| File                              | Produced by                | Contents                                                                     |
+| --------------------------------- | -------------------------- | ---------------------------------------------------------------------------- |
+| `results/results.csv`             | `save_results_csv`         | Metrics for each model × val/test                                            |
+| `results/eda_stats.json`          | `summarize_data`           | Data statistics, split sizes, cut dates                                      |
+| `results/figures/` data plots     | `summarize_data._plot_all` | 4 figures: long tail (items, users), rating distribution, activity over time |
+| `results/part1_item_knn_grid.csv` | `run_part1` step 5         | All 15 tuning trials                                                         |
+| `results/part1_sensitivity.csv`   | `run_part1` step 8         | Comparison of thresholds 1/5/20                                              |
+| `results/logs/run.log`            | `run_all._setup_logging`   | Everything you see on the screen                                             |
