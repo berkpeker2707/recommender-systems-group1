@@ -23,6 +23,10 @@ from src.summarize_data import summarize_data
 log = logging.getLogger(__name__)
 
 # take a  model that is already trained and give it a score
+# model a trained "most popular" or "item-kNN" model
+# evaluation_ratings the ratings to evaluate on (validation or test)
+# training_ratings the ratings to use for building the user-movie matrix of seen movies
+# min_user_ratings the minimum number of ratings a user must have in training_ratings to be evaluated on evaluation_ratings, by default 5
 def _evaluate_fitted_model(model, training_ratings, evaluation_ratings, id_mappings,
                           min_user_ratings=config.MIN_USER_RATINGS_IN_TRAINING):
     """Score a fitted model on evaluation_ratings, for users with >= min_user_ratings in training_ratings."""
@@ -32,12 +36,16 @@ def _evaluate_fitted_model(model, training_ratings, evaluation_ratings, id_mappi
     seen_movies = build_user_movie_matrix(training_ratings, id_mappings.n_users, id_mappings.n_movies, values="binary")
     return evaluate_model(model, seen_movies, relevant_movies, users, config.RECOMMENDATION_LIST_SIZE)
 
-
+# returns a list of MostPopular models with different settings, as specified in config.MOST_POPULAR_VARIANTS
+# example:
+# [MostPopular("pop_alltime_count", None, False, 4),
+# MostPopular("pop_alltime_positive", None, True, 4),
+# MostPopular("pop_recent90_count", 90, False, 4)]
 def _create_most_popular_models():
     return [MostPopular(name, window_days, positives_only, config.RELEVANT_RATING_THRESHOLD)
             for name, (window_days, positives_only) in config.MOST_POPULAR_VARIANTS.items()]
 
-
+# format for logging the metrics in a single line, nothing else
 def _format_metrics(summary):
     return ("P@10={precision@10:.4f} R@10={recall@10:.4f} NDCG@10={ndcg@10:.4f} "
             "cov={coverage@10:.3f} users={n_users}").format(**summary)
