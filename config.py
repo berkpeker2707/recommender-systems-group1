@@ -1,5 +1,5 @@
 """
-constansts and hyperparameters for the experiments
+constants and hyperparameters for the experiments
 """
 
 SEED = 42
@@ -19,7 +19,7 @@ MOST_POPULAR_VARIANTS = {
     # name: (time window in days before the train cut, or None = all time; positives only?)
     "pop_alltime_count": (None, False), # all time, count all ratings
     "pop_alltime_positive": (None, True), # all time, count only positives (4 & 5's for example)
-    "pop_recent90_count": (90, False), # last 90 days with postive and negative ratings
+    "pop_recent90_count": (90, False), # last 90 days with positive and negative ratings
 }
 ITEM_KNN_NEIGHBOR_COUNTS = [10, 20, 50, 100, 200]
 ITEM_KNN_SIMILARITY_MEASURES = ["cosine", "jaccard", "adjusted_cosine"]

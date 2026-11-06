@@ -2,7 +2,6 @@
 
 > When you type `python run_all.py --data-dir data/ml-1m`, this file explains **which function in which
 > file runs, in what order, and why**. It assumes you know nothing about the code.
-> For the concepts (train/test, tuning, NDCG…), read [PROJECT_OVERVIEW.md](PROJECT_OVERVIEW.md) first.
 
 ---
 
@@ -42,7 +41,7 @@ run_all.py
 
 **Why this way?**
 
-- The brief says everything must be reproducible with one command, so there is one entry point.
+- The assignment says everything must be reproducible with one command, so there is one entry point.
 - The data path comes from the command line and is not written into the code (the teacher will use a different folder on their computer).
 
 > Where are the settings? All fixed values (threshold 4, the k list, 80/10/10…) are in [config.py](../config.py).
@@ -327,7 +326,7 @@ The question: would the results change if we chose 1 or 20 instead of the "5 rat
 - The models are **not retrained.** Only the list of users taking the exam changes, because
   `_evaluate_fitted_model()` is called again with `min_user_ratings` set to 1 and 20.
 - The result is written to `results/part1_sensitivity.csv`.
-- Finding: a threshold of 20 lowers the popularity scores by about 0.005. That is very close to the gap between kNN and popularity (≈0.007). The report must say this honestly.
+- Finding: a threshold of 20 lowers the popularity scores by about 0.005. That is very close to the gap between kNN and popularity (≈0.007). The report must say this.
 
 ---
 

@@ -58,8 +58,8 @@ def run_part1(data_dir, out_dir):
     # first element is the top-1 recommendation, second is top-2, etc.
     list_size = config.RECOMMENDATION_LIST_SIZE
 
-    # normalized discounted cumulative gaini. it means how many films the user has seen in the top-k recommendations, weighted by their position in the list
-    # if they are down, the score is lower. the score is normalized by the ideal scoreç
+    # normalized discounted cumulative gain. it counts how many movies the user liked (rated 4-5) are in the top-k recommendations, weighted by their position in the list
+    # if they are lower in the list, the score is lower. the score is normalized by the ideal score
     ndcg_column = f"ndcg@{list_size}"
 
     # section 1 - data

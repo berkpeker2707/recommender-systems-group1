@@ -1,7 +1,6 @@
 # Recommender Systems Course Project — Group 1
 
 > STATUS: Part 1 implemented. To reproduce it, see "Quick start" below.
-> What the project is about, what each part requires, and the options for Parts 2–3: `docs/PROJECT_OVERVIEW.md`.
 > Decisions and open questions: `docs/PLAN.md`.
 
 Part 1: data characterisation, temporal evaluation protocol and two baselines (Most Popular,
@@ -10,14 +9,13 @@ Report and results workbook: `results/(Group 1) Recommender_Systems_*` · Team: 
 
 ## Quick start: reproduce everything
 
-**1. Get the data.** MovieLens 1M is not included in this repository (GroupLens usage terms).
-Download `ml-1m.zip` from https://grouplens.org/datasets/movielens/1m/ and unzip it anywhere.
-The folder must contain `ratings.dat` and `movies.dat`.
+**1. The data.** MovieLens 1M is included in `data/ml-1m/` (from https://grouplens.org/datasets/movielens/1m/).
+The program reads it from there by default.
 
-**2. Run one command** from the repository folder, with the path to that unzipped folder:
+**2. Run one command** from the repository folder:
 
 ```bash
-uv run --python 3.11 --with-requirements requirements.txt run_all.py --data-dir /path/to/ml-1m
+uv run --python 3.11 --with-requirements requirements.txt run_all.py
 ```
 
 This single command downloads Python 3.11 if needed, installs the exact package versions from
@@ -33,7 +31,7 @@ It needs [uv](https://docs.astral.sh/uv/getting-started/installation/), installe
 python3.11 -m venv .venv
 source .venv/bin/activate          # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
-python run_all.py --data-dir /path/to/ml-1m
+python run_all.py
 ```
 
 </details>
@@ -42,7 +40,7 @@ python run_all.py --data-dir /path/to/ml-1m
 `results/part1_sensitivity.csv`, `results/figures/*.png` and `results/logs/run.log`.
 The run is deterministic, so it regenerates the committed files exactly.
 
-**Tests** (metric implementation vs. the Lecture 3.1 slide 8 example):
+**Tests** (metric implementation vs. hand-calculated examples):
 `uv run --python 3.11 --with-requirements requirements.txt -m pytest tests -q`
 
 **Code formatting** (only needed if you change the code): we use [Ruff](https://docs.astral.sh/ruff/),
@@ -65,7 +63,7 @@ Python 3.11.17. All versions are pinned in `requirements.txt`.
 | numpy      | 2.4.6   | Arrays and maths: counting, sorting the top 10, metric formulas                                                                     | most files in `src/`                                                                   |
 | pandas     | 3.1.0   | Tables: reading the ratings, splitting, grouping, writing CSV files                                                                 | most files in `src/`                                                                   |
 | scipy      | 1.17.1  | `scipy.sparse`: the user × movie matrix and the kNN neighbour lists. `scipy.stats`: the t-distribution for 95% confidence intervals | `src/split_data.py`, `src/models/item_knn.py`, `src/evaluation/confidence_interval.py` |
-| matplotlib | 3.11.2  | All figures                                                                                                                         | `src/summarize_data.py`, `src/plots.py`                                                |
+| matplotlib | 3.11.2  | All figures                                                                                                                         | `src/summarize_data.py`                                                                 |
 | pytest     | 9.2.0   | Unit tests only; not needed to produce the results                                                                                  | `tests/`                                                                               |
 | ruff       | 0.17.3  | Code formatting only; not needed to produce the results                                                                             | `pyproject.toml`                                                                       |
 
@@ -75,7 +73,7 @@ are our own code.
 
 ## Results (Part 1)
 
-_Numbers from `python run_all.py`; update this section by hand if the results change._
+_Numbers from the run command in "Quick start" above; update this section by hand if the results change._
 
 ### 1. The data
 
@@ -186,4 +184,4 @@ docs/                    plan, code walkthrough, team split
 
 ## Use of AI assistants
 
-Disclosed in the report (section "Use of AI"), as required by the brief.
+Disclosed in the report (section "Use of AI"), as required by the assignment.

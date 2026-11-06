@@ -1,5 +1,5 @@
 """
-Runs the project: python run_all.py --data-dir data/ml-1m [--out results]
+Runs the project: python run_all.py [--data-dir data/ml-1m] [--out results]
 """
 import argparse
 import logging
@@ -24,7 +24,7 @@ def _setup_logging(out_dir: Path):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--data-dir", required=True, help="folder containing ratings.dat and movies.dat")
+    ap.add_argument("--data-dir", default="data/ml-1m", help="folder containing ratings.dat and movies.dat")
     ap.add_argument("--out", default="results")
     args = ap.parse_args()
 
