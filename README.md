@@ -19,8 +19,8 @@ uv run --python 3.11 --with-requirements requirements.txt run_all.py
 ```
 
 This single command downloads Python 3.11 if needed, installs the exact package versions from
-`requirements.txt` into a temporary environment, and runs the whole project. It works the same on
-macOS, Linux and Windows. The first run takes about a minute (downloads), later runs about 30 seconds.
+`requirements.txt` into a temporary environment, and runs the whole project. The first run takes about
+a minute (downloads), later runs about 20 seconds.
 It needs [uv](https://docs.astral.sh/uv/getting-started/installation/), installed with one line:
 `curl -LsSf https://astral.sh/uv/install.sh | sh` (macOS/Linux) or
 `powershell -c "irm https://astral.sh/uv/install.ps1 | iex"` (Windows).
@@ -141,14 +141,14 @@ Chosen: **adjusted cosine, k = 50** (validation NDCG@10 = 0.127).
 | model                    | ≥ 1 train ratings | ≥ 5 train ratings | ≥ 20 train ratings |
 | ------------------------ | ----------------- | ----------------- | ------------------ |
 | Item-kNN                 | 0.2183            | 0.2185            | 0.2178             |
-| Popular (all ratings)    | 0.2008            | 0.2003            | 0.1966             |
-| Popular (4–5 stars only) | 0.2121            | 0.2119            | 0.2067             |
+| Popular (all ratings)    | 0.2007            | 0.2003            | 0.1966             |
+| Popular (4–5 stars only) | 0.2121            | 0.2120            | 0.2067             |
 | Popular (last 90 days)   | 0.2022            | 0.2018            | 0.1983             |
 
 ## Reproducibility details
 
 - Seed: `SEED` in `config.py` (42).
-- Split: global temporal split, cut points in `config.py` and printed in the log.
+- Split: global temporal split; the fractions are in `config.py`, the cut dates are printed in the log.
 - Filtering thresholds, k-grid, similarity grid: `config.py`.
 - No intermediate files are needed: the split and all results are regenerated.
 
@@ -159,14 +159,14 @@ run_all.py               single entry point
 config.py                every tunable constant (seed, split, thresholds, grids)
 pyproject.toml           Ruff formatter settings
 src/data/load_data.py         parse ml-1m (:: separated)
-src/summarize_data.py               dataset characterisation + plots
+src/summarize_data.py         dataset characterisation + plots
 src/split_data.py             temporal train/val/test + user filtering
-src/models/              Most Popular, item-kNN (base.py is commented out until Part 2)
-src/evaluation/          metrics, full-catalogue evaluator, confidence intervals
-src/experiments/run_part1.py runs the whole Part 1 pipeline
-src/save_results.py           writes results in the mandatory template schema
-tests/                   metric unit tests (worked example)
-docs/                    plan, code walkthrough, team split
+src/models/                   Most Popular, item-kNN (base.py is commented out until Part 2)
+src/evaluation/               metrics, full-catalogue evaluator, confidence intervals
+src/experiments/run_part1.py  runs the whole Part 1 pipeline
+src/save_results.py           writes results.csv (template columns plus Part, Split, CI, Users evaluated)
+tests/                        metric unit tests (worked example)
+docs/                         plan, code walkthrough
 ```
 
 ## Report ↔ output mapping
@@ -184,4 +184,4 @@ docs/                    plan, code walkthrough, team split
 
 ## Use of AI assistants
 
-Disclosed in the report (section "Use of AI"), as required by the assignment.
+Disclosed in the report (section 6, "Use of AI Assistants"), as required by the assignment.
