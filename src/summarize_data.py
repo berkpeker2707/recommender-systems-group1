@@ -45,7 +45,7 @@ def _dataset_stats(ratings: pd.DataFrame, n_catalogue: int, threshold: int) -> d
         "ratings_by_year": {int(k): int(v) for k, v in by_year.items()},
         # added for report Section 1.1
         "density_catalogue": len(ratings) / (n_u * n_catalogue),
-        "top10pct_items_share": top_share(item_counts, 0.10),
+        "top10pct_items_share": _top_share(item_counts, 0.10),
         "n_items_lt10_ratings": int((item_counts < 10).sum()),
         "share_users_single_day": float((ratings["rated_at"].dt.date.groupby(ratings["user_id"]).nunique() == 1).mean()),
     }

@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from src.models.bpr import BPR, _add_to_rows
+from src.models.bpr import BPR
 from src.models.content_based import ContentBased
 from src.models.user_knn import UserKNN
 
@@ -44,17 +44,6 @@ def test_user_knn_worked_example():
     # the only neighbour is user 1, so movie 2 gets 0.816 and movie 3 (only user 2 saw it) gets 0
     assert scores[2] == pytest.approx(2 / np.sqrt(6), abs=1e-6)
     assert scores[3] == 0.0
-
-
-def test_add_to_rows_same_as_numpy_add_at():
-    rng = np.random.default_rng(0)
-    rows = np.array([4, 7, 4, 0, 7, 7])
-    changes = rng.normal(size=(6, 3)).astype(np.float32)
-    expected = np.zeros((8, 3), dtype=np.float32)
-    np.add.at(expected, rows, changes)
-    result = np.zeros((8, 3), dtype=np.float32)
-    _add_to_rows(result, rows, changes)
-    assert result == pytest.approx(expected, abs=1e-6)
 
 
 def test_bpr_learns_two_taste_groups():

@@ -1,31 +1,31 @@
 Model,Breakdown dimension,Group,Definition / threshold,Precision@10,Recall@10,NDCG@10,Catalogue coverage,Seed(s),Notes
-Most Popular,user activity,low activity,training ratings <= 150 (median),0.19931,0.05612,0.21938,0.01056,42,579 users; NDCG@10 95% CI ± 0.0212
-Most Popular,user activity,high activity,training ratings > 150 (median),0.18974,0.05708,0.20447,0.03631,42,575 users; NDCG@10 95% CI ± 0.0195
-Most Popular,item popularity,popular,top 20% of movies by training ratings (>= 363),0.20135,0.08093,0.22313,0.18147,42,1115 users; NDCG@10 95% CI ± 0.0147; coverage = share of this group's movies recommended at least once
-Most Popular,item popularity,long tail,the other 80% of movies,0.00000,0.00000,0.00000,0.00000,42,1044 users; NDCG@10 95% CI ± 0.0000; coverage = share of this group's movies recommended at least once
-Most Popular,test period,early,test ratings before 2001-06-20,0.12534,0.05307,0.14071,0.03605,42,888 users; NDCG@10 95% CI ± 0.0138
-Most Popular,test period,late,test ratings from 2001-06-20,0.14347,0.05512,0.15738,0.03425,42,789 users; NDCG@10 95% CI ± 0.0145
-Item-based kNN,user activity,low activity,training ratings <= 150 (median),0.19724,0.06483,0.21707,0.12078,42,579 users; NDCG@10 95% CI ± 0.0203
-Item-based kNN,user activity,high activity,training ratings > 150 (median),0.20365,0.06524,0.21996,0.08035,42,575 users; NDCG@10 95% CI ± 0.0194
-Item-based kNN,item popularity,popular,top 20% of movies by training ratings (>= 363),0.20601,0.09226,0.22960,0.42600,42,1115 users; NDCG@10 95% CI ± 0.0144; coverage = share of this group's movies recommended at least once
-Item-based kNN,item popularity,long tail,the other 80% of movies,0.00153,0.00045,0.00139,0.06890,42,1044 users; NDCG@10 95% CI ± 0.0009; coverage = share of this group's movies recommended at least once
-Item-based kNN,test period,early,test ratings before 2001-06-20,0.13029,0.06320,0.14696,0.12671,42,888 users; NDCG@10 95% CI ± 0.0138
-Item-based kNN,test period,late,test ratings from 2001-06-20,0.14651,0.06117,0.16170,0.12104,42,789 users; NDCG@10 95% CI ± 0.0141
-User-based kNN,user activity,low activity,training ratings <= 150 (median),0.19430,0.05898,0.21132,0.04661,42,579 users; NDCG@10 95% CI ± 0.0200
-User-based kNN,user activity,high activity,training ratings > 150 (median),0.19078,0.05998,0.21437,0.07314,42,575 users; NDCG@10 95% CI ± 0.0198
-User-based kNN,item popularity,popular,top 20% of movies by training ratings (>= 363),0.19928,0.08383,0.22426,0.40026,42,1115 users; NDCG@10 95% CI ± 0.0144; coverage = share of this group's movies recommended at least once
-User-based kNN,item popularity,long tail,the other 80% of movies,0.00000,0.00000,0.00000,0.00064,42,1044 users; NDCG@10 95% CI ± 0.0000; coverage = share of this group's movies recommended at least once
-User-based kNN,test period,early,test ratings before 2001-06-20,0.12714,0.05666,0.14303,0.07881,42,888 users; NDCG@10 95% CI ± 0.0137
-User-based kNN,test period,late,test ratings from 2001-06-20,0.13853,0.05493,0.15712,0.07262,42,789 users; NDCG@10 95% CI ± 0.0145
-BPR matrix factorization,user activity,low activity,training ratings <= 150 (median),0.19648,0.06485,0.21374,0.09508,"42, 43, 44, 45, 46",579 users; NDCG@10 95% CI ± 0.0192; mean of 5 seeds
-BPR matrix factorization,user activity,high activity,training ratings > 150 (median),0.17805,0.05338,0.19676,0.13696,"42, 43, 44, 45, 46",575 users; NDCG@10 95% CI ± 0.0189; mean of 5 seeds
-BPR matrix factorization,item popularity,popular,top 20% of movies by training ratings (>= 363),0.19259,0.08532,0.21622,0.65946,"42, 43, 44, 45, 46",1115 users; NDCG@10 95% CI ± 0.0138; coverage = share of this group's movies recommended at least once; mean of 5 seeds
-BPR matrix factorization,item popularity,long tail,the other 80% of movies,0.00134,0.00067,0.00132,0.02325,"42, 43, 44, 45, 46",1044 users; NDCG@10 95% CI ± 0.0008; coverage = share of this group's movies recommended at least once; mean of 5 seeds
-BPR matrix factorization,test period,early,test ratings before 2001-06-20,0.12486,0.05712,0.14179,0.14623,"42, 43, 44, 45, 46",888 users; NDCG@10 95% CI ± 0.0134; mean of 5 seeds
-BPR matrix factorization,test period,late,test ratings from 2001-06-20,0.13341,0.05195,0.14740,0.13520,"42, 43, 44, 45, 46",789 users; NDCG@10 95% CI ± 0.0137; mean of 5 seeds
-Content-based profile matching,user activity,low activity,training ratings <= 150 (median),0.02936,0.00872,0.03034,0.38372,42,579 users; NDCG@10 95% CI ± 0.0072
-Content-based profile matching,user activity,high activity,training ratings > 150 (median),0.02939,0.00874,0.02994,0.30106,42,575 users; NDCG@10 95% CI ± 0.0065
-Content-based profile matching,item popularity,popular,top 20% of movies by training ratings (>= 363),0.02036,0.00830,0.02230,0.59073,42,1115 users; NDCG@10 95% CI ± 0.0041; coverage = share of this group's movies recommended at least once
-Content-based profile matching,item popularity,long tail,the other 80% of movies,0.01073,0.00727,0.01072,0.37798,42,1044 users; NDCG@10 95% CI ± 0.0028; coverage = share of this group's movies recommended at least once
-Content-based profile matching,test period,early,test ratings before 2001-06-20,0.01723,0.00785,0.01851,0.39995,42,888 users; NDCG@10 95% CI ± 0.0043
-Content-based profile matching,test period,late,test ratings from 2001-06-20,0.02357,0.00697,0.02347,0.39119,42,789 users; NDCG@10 95% CI ± 0.0052
+Most Popular,user activity,low activity,training ratings <= 150 (median),0.19931,0.05612,0.21938,0.01056,42,579 users
+Most Popular,user activity,high activity,training ratings > 150 (median),0.18974,0.05708,0.20447,0.03631,42,575 users
+Most Popular,item popularity,popular,top 20% of movies by training ratings (>= 363),0.20135,0.08093,0.22313,0.18147,42,1115 users
+Most Popular,item popularity,long tail,the other 80% of movies,0.00000,0.00000,0.00000,0.00000,42,1044 users
+Most Popular,test period,early,test ratings before 2001-06-20,0.12534,0.05307,0.14071,0.03605,42,888 users
+Most Popular,test period,late,test ratings from 2001-06-20,0.14347,0.05512,0.15738,0.03425,42,789 users
+Item-based kNN,user activity,low activity,training ratings <= 150 (median),0.19724,0.06483,0.21707,0.12078,42,579 users
+Item-based kNN,user activity,high activity,training ratings > 150 (median),0.20365,0.06524,0.21996,0.08035,42,575 users
+Item-based kNN,item popularity,popular,top 20% of movies by training ratings (>= 363),0.20601,0.09226,0.22960,0.42600,42,1115 users
+Item-based kNN,item popularity,long tail,the other 80% of movies,0.00153,0.00045,0.00139,0.06890,42,1044 users
+Item-based kNN,test period,early,test ratings before 2001-06-20,0.13029,0.06320,0.14696,0.12671,42,888 users
+Item-based kNN,test period,late,test ratings from 2001-06-20,0.14651,0.06117,0.16170,0.12104,42,789 users
+User-based kNN,user activity,low activity,training ratings <= 150 (median),0.19430,0.05898,0.21133,0.04661,42,579 users
+User-based kNN,user activity,high activity,training ratings > 150 (median),0.19078,0.05998,0.21437,0.07314,42,575 users
+User-based kNN,item popularity,popular,top 20% of movies by training ratings (>= 363),0.19928,0.08383,0.22427,0.40026,42,1115 users
+User-based kNN,item popularity,long tail,the other 80% of movies,0.00000,0.00000,0.00000,0.00064,42,1044 users
+User-based kNN,test period,early,test ratings before 2001-06-20,0.12714,0.05666,0.14303,0.07881,42,888 users
+User-based kNN,test period,late,test ratings from 2001-06-20,0.13853,0.05493,0.15712,0.07262,42,789 users
+BPR matrix factorization,user activity,low activity,training ratings <= 150 (median),0.19648,0.06485,0.21374,0.09508,"42, 43, 44, 45, 46",579 users
+BPR matrix factorization,user activity,high activity,training ratings > 150 (median),0.17805,0.05338,0.19676,0.13696,"42, 43, 44, 45, 46",575 users
+BPR matrix factorization,item popularity,popular,top 20% of movies by training ratings (>= 363),0.19259,0.08532,0.21622,0.65946,"42, 43, 44, 45, 46",1115 users
+BPR matrix factorization,item popularity,long tail,the other 80% of movies,0.00134,0.00067,0.00132,0.02325,"42, 43, 44, 45, 46",1044 users
+BPR matrix factorization,test period,early,test ratings before 2001-06-20,0.12486,0.05712,0.14179,0.14623,"42, 43, 44, 45, 46",888 users
+BPR matrix factorization,test period,late,test ratings from 2001-06-20,0.13341,0.05195,0.14740,0.13520,"42, 43, 44, 45, 46",789 users
+Content-based profile matching,user activity,low activity,training ratings <= 150 (median),0.02936,0.00872,0.03034,0.38372,42,579 users
+Content-based profile matching,user activity,high activity,training ratings > 150 (median),0.02939,0.00874,0.02994,0.30106,42,575 users
+Content-based profile matching,item popularity,popular,top 20% of movies by training ratings (>= 363),0.02036,0.00830,0.02230,0.59073,42,1115 users
+Content-based profile matching,item popularity,long tail,the other 80% of movies,0.01073,0.00727,0.01072,0.37798,42,1044 users
+Content-based profile matching,test period,early,test ratings before 2001-06-20,0.01723,0.00785,0.01851,0.39995,42,888 users
+Content-based profile matching,test period,late,test ratings from 2001-06-20,0.02357,0.00697,0.02347,0.39119,42,789 users

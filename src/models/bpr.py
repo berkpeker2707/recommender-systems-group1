@@ -12,23 +12,8 @@ from typing import Any, Self
 
 import numpy as np
 import pandas as pd
-import scipy.sparse as sp
 
 from src.models.base import Recommender
-
-
-def _add_to_rows(matrix: np.ndarray, rows: np.ndarray, changes: np.ndarray) -> None:
-    """matrix[rows[n]] += changes[n], also when a row appears twice.
-
-    Same result as np.add.at(matrix, rows, changes), but about 3x faster.
-    example: rows [4, 7, 4] -> row 4 gets changes[0] + changes[2], row 7 gets changes[1]
-    """
-    distinct_rows, position = np.unique(rows, return_inverse=True)
-    which_row = sp.csr_matrix(
-        (np.ones(len(rows), np.float32), (position, np.arange(len(rows)))),
-        shape=(len(distinct_rows), len(rows)),
-    )
-    matrix[distinct_rows] += which_row @ changes
 
 
 @dataclass
@@ -81,11 +66,12 @@ class BPR(Recommender):
 
         learning_rate, regularization = self.learning_rate, self.regularization
         # move u towards i and away from j; raise b_i, lower b_j; shrink everything a little
-        _add_to_rows(
+        # np.add.at instead of "+=": it also adds correctly when a user or movie appears twice
+        np.add.at(
             self.user_factors, u, learning_rate * (weight * (q_i - q_j) - regularization * p_u)
         )
-        _add_to_rows(self.movie_factors, i, learning_rate * (weight * p_u - regularization * q_i))
-        _add_to_rows(self.movie_factors, j, learning_rate * (-weight * p_u - regularization * q_j))
+        np.add.at(self.movie_factors, i, learning_rate * (weight * p_u - regularization * q_i))
+        np.add.at(self.movie_factors, j, learning_rate * (-weight * p_u - regularization * q_j))
         np.add.at(self.movie_bias, i, learning_rate * (weight[:, 0] - regularization * b_i))
         np.add.at(self.movie_bias, j, learning_rate * (-weight[:, 0] - regularization * b_j))
 

@@ -8,7 +8,6 @@ from typing import Any, Self
 
 import numpy as np
 import pandas as pd
-import scipy.sparse as sp
 
 from src.models.base import Recommender
 from src.split_data import build_user_movie_matrix
@@ -57,18 +56,21 @@ class UserKNN(Recommender):
                 raise ValueError(f"unknown similarity {self.similarity_measure!r}")
         similarity[np.arange(len(user_indices)), user_indices] = 0.0  # not your own neighbour
 
-        # 2. keep the n_neighbors most similar users, drop negative similarities
+        # 2. keep the n_neighbors most similar users; every other user gets weight 0
         n_neighbors = min(self.n_neighbors, similarity.shape[1] - 1)
-        neighbor_columns = np.argpartition(-similarity, n_neighbors, axis=1)[:, :n_neighbors]
-        neighbor_values = np.take_along_axis(similarity, neighbor_columns, axis=1).clip(min=0)
-        neighbor_rows = np.repeat(np.arange(len(user_indices)), n_neighbors)
-        neighbors = sp.csr_matrix(
-            (neighbor_values.ravel(), (neighbor_rows, neighbor_columns.ravel())),
-            shape=similarity.shape,
+        neighbor_columns = np.argsort(-similarity, axis=1, kind="stable")[:, :n_neighbors]
+        neighbor_weights = np.zeros_like(similarity)
+        np.put_along_axis(
+            neighbor_weights,
+            neighbor_columns,
+            np.take_along_axis(similarity, neighbor_columns, axis=1),
+            axis=1,
         )
+        neighbor_weights = neighbor_weights.clip(min=0)  # drop negative similarities
+
         # 3. movie score = sum of the similarities of the neighbours who rated it
         # example: neighbours A (0.5) and B (0.3) rated the movie, C did not -> 0.8
-        return (neighbors @ self.rated_matrix).toarray()
+        return neighbor_weights @ self.rated_matrix
 
     def params(self) -> dict[str, Any]:
         return {"k": self.n_neighbors, "similarity": self.similarity_measure}

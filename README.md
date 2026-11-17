@@ -16,7 +16,7 @@ uv run --python 3.11 --with-requirements requirements.txt run_all.py
 ```
 
 This downloads Python 3.11 if needed, installs the exact package versions from `requirements.txt` and
-runs the whole project (about 3 minutes: Part 1 ~15 s, Part 2 ~2.5 min). It needs
+runs the whole project (about 5 minutes: Part 1 ~15 s, Part 2 ~5 min). It needs
 [uv](https://docs.astral.sh/uv/getting-started/installation/):
 `curl -LsSf https://astral.sh/uv/install.sh | sh` (macOS/Linux) or
 `powershell -c "irm https://astral.sh/uv/install.ps1 | iex"` (Windows).
@@ -54,8 +54,10 @@ Python 3.11.17. All versions are pinned in `requirements.txt`.
 
 ## Part 1 in short: data, protocol, baselines
 
-- **Data:** 6,040 users, 3,883 movies, 1,000,209 ratings, density 4.47%. Strong long tail: the 20% most
-  rated movies get 66.7% of all ratings.
+- **Data:** 6,040 users, 3,883 movies, 1,000,209 ratings, density 4.47% (4.26% over the full catalogue).
+  Strong long tail: the 10% most rated movies get 45.7% of all ratings, the 20% most rated get 66.7%;
+  623 movies have fewer than 10 ratings. Bursty timestamps: 58.7% of users entered all their ratings on a
+  single day.
 - **Protocol:** global temporal split 80/10/10 (train → 2000-12-02, validation → 2000-12-29, test after).
   A rating of 4–5 stars counts as relevant. Users need ≥ 5 training ratings to be evaluated. Every model
   ranks the full catalogue. Metrics: P@10, R@10, NDCG@10 (with 95% CI) and catalogue coverage.
@@ -161,8 +163,8 @@ affected and ranks first at 50% and 20%.
 - Models: `src/models/user_knn.py`, `bpr.py`, `content_based.py`
 - Pipeline: `src/experiments/run_part2.py`, `src/evaluation/disaggregate.py`, `src/plot_part2.py`
 - Tests: `tests/test_models.py` (each model checked against a hand-calculated example)
-- Results: `results/part2_tuning.csv`, `part2_models.csv`, `part2_disaggregated.csv`, `part2_sparsity.csv`
-  (+ `_runs.csv`), `results/figures/part2_*.png`; all runs are also in `results/results.csv`
+- Results: `results/part2_models.csv`, `part2_disaggregated.csv`, `part2_sparsity.csv`,
+  `results/figures/part2_*.png`; every validation and test run is also in `results/results.csv`
 
 ## Reproducibility details
 

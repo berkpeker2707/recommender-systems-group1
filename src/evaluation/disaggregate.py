@@ -9,7 +9,6 @@ The top-10 lists stay the same; only the users or the correct answers we look at
 import numpy as np
 import pandas as pd
 
-from src.evaluation.confidence_interval import mean_with_confidence_interval
 from src.evaluation.evaluate_model import evaluate_lists
 from src.split_data import find_relevant_movies
 
@@ -87,19 +86,17 @@ def disaggregate(
     rows = []
     for dimension, group, definition, group_relevant, catalogue in groups:
         keep = np.isin(users, list(group_relevant))
-        summary, per_user = evaluate_lists(lists[keep], users[keep], group_relevant, n_movies)
+        summary, _ = evaluate_lists(lists[keep], users[keep], group_relevant, n_movies)
         if catalogue is not None:
             # coverage inside the group, e.g. the share of long-tail movies recommended at least once
             recommended = set(lists[keep].ravel().tolist())
             summary["coverage@10"] = len(recommended & set(catalogue.tolist())) / len(catalogue)
-        _, interval = mean_with_confidence_interval(per_user["ndcg@10"])
         rows.append(
             {
                 "dimension": dimension,
                 "group": group,
                 "definition": definition,
                 **summary,
-                "ndcg@10_ci": interval,
             }
         )
     return rows
