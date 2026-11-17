@@ -7,6 +7,7 @@ Reads the MovieLens files into tables and numbers users and movies from 0 for th
 from dataclasses import dataclass
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 
 ENCODING = "latin-1"
@@ -31,9 +32,10 @@ def load_ratings(data_dir) -> pd.DataFrame:
 def load_movies(data_dir) -> pd.DataFrame:
     movies = _read_dat_file(Path(data_dir) / "movies.dat", ["movie_id", "title", "genres"])
     movies["movie_id"] = movies["movie_id"].astype("int32")
-    # Part 2-3: content-based models and re-ranking need the year and the genre list
-    # movies["year"] = movies["title"].str.extract(r"\((\d{4})\)\s*$")[0].astype("Int16")
-    # movies["genres"] = movies["genres"].str.split("|")
+    # the content-based model (Part 2) needs the release year and the genre list
+    # "Toy Story (1995)" -> 1995;  "Animation|Children's|Comedy" -> ["Animation", "Children's", "Comedy"]
+    movies["year"] = movies["title"].str.extract(r"\((\d{4})\)\s*$")[0].astype("int32")
+    movies["genres"] = movies["genres"].str.split("|")
     return movies
 
 
@@ -64,3 +66,24 @@ def add_matrix_indices(ratings: pd.DataFrame, id_mappings: IdMappings) -> pd.Dat
     indexed_ratings["user_index"] = id_mappings.user_ids.get_indexer(indexed_ratings["user_id"]).astype("int32")
     indexed_ratings["movie_index"] = id_mappings.movie_ids.get_indexer(indexed_ratings["movie_id"]).astype("int32")
     return indexed_ratings
+
+
+# movies released before this year share one "old" decade group (only ~240 of 3,883 movies)
+OLDEST_DECADE = 1940
+
+
+def build_movie_features(movies: pd.DataFrame, id_mappings: IdMappings):
+    """Two 0/1 tables with one row per movie_index.
+
+    genre_matrix : 18 columns, a 1 for every genre of the movie
+    decade_matrix: one column per release decade (1940s and older together, ..., 2000)
+    example: Toy Story (1995), Animation|Children's|Comedy -> 1 in 3 genre columns and in "1990"
+    """
+    movies = movies.set_index("movie_id").reindex(id_mappings.movie_ids)
+    genre_names = sorted({genre for genres in movies["genres"] for genre in genres})
+    genre_matrix = np.array([[genre in genres for genre in genre_names] for genres in movies["genres"]],
+                            dtype=np.float32)
+    decades = (movies["year"].to_numpy() // 10 * 10).clip(min=OLDEST_DECADE)
+    decade_names = sorted({int(decade) for decade in decades})
+    decade_matrix = (decades[:, None] == np.array(decade_names)[None, :]).astype(np.float32)
+    return genre_matrix, decade_matrix, genre_names, decade_names
