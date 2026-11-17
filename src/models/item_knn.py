@@ -11,7 +11,7 @@ import numpy as np
 import pandas as pd
 import scipy.sparse as sp
 
-# from src.models.base import Recommender  # Part 2
+from src.models.base import Recommender
 from src.split_data import build_user_movie_matrix
 
 
@@ -65,7 +65,7 @@ def _keep_nearest_neighbors(similarity: np.ndarray, n_neighbors: int) -> sp.csr_
 
 
 @dataclass
-class ItemKNN:  # Part 2: ItemKNN(Recommender)
+class ItemKNN(Recommender):
     n_neighbors: int
     similarity_measure: str = "cosine"
     name: str = field(init=False)

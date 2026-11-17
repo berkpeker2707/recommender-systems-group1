@@ -7,13 +7,13 @@ from typing import Self
 import numpy as np
 import pandas as pd
 
-# from src.models.base import Recommender  # Part 2
+from src.models.base import Recommender
 
 SECONDS_PER_DAY = 86400
 
 
 @dataclass
-class MostPopular:  # Part 2: MostPopular(Recommender)
+class MostPopular(Recommender):
     name: str
     window_days: int | None = None
     positives_only: bool = False

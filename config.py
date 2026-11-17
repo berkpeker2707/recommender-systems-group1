@@ -23,3 +23,22 @@ MOST_POPULAR_VARIANTS = {
 }
 ITEM_KNN_NEIGHBOR_COUNTS = [10, 20, 50, 100, 200]
 ITEM_KNN_SIMILARITY_MEASURES = ["cosine", "jaccard", "adjusted_cosine"]
+
+USER_KNN_NEIGHBOR_COUNTS = [10, 20, 50, 100, 200]
+USER_KNN_SIMILARITY_MEASURES = ["cosine", "jaccard", "pearson"]
+
+BPR_FACTORS = 64 # fixed num; the length of every user and movie vector
+BPR_LEARNING_RATE = 0.05 # fixed num
+BPR_EPOCHS = [5, 10, 20] # how many times training goes over all ratings
+BPR_REGULARIZATIONS = [0.001, 0.003, 0.01, 0.03, 0.1] # tuned: penalty on large vectors
+
+CONTENT_YEAR_WEIGHTS = [0.0, 0.25, 0.5, 1.0, 2.0]  # 0 = genres only
+CONTENT_PROFILE_WEIGHTINGS = ["centered", "liked", "all"]
+
+# reported as mean +- 95% CI over the seeds. Tuning uses SEED only.
+SEEDS = [42, 43, 44, 45, 46]
+
+# popular items is the 20% of movies with the most training ratings, the rest is the long tail
+HEAD_ITEM_SHARE = 0.2
+# sparsity ablation: keep this share of the training ratings (drawn at random, once per seed)
+SPARSITY_FRACTIONS = [1.0, 0.5, 0.2]

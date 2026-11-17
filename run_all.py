@@ -39,11 +39,13 @@ def main():
         sys.exit(1)
 
     from src.experiments.run_part1 import run_part1
-    t0 = time.time()
-    log.info("===== Part 1 =====")
-    run_part1(data_dir, out_dir)
-    log.info("Part 1 done")
-    print(f"Part 1 done in {time.time() - t0:.1f} s")  # console only, keeps run.log deterministic
+    from src.experiments.run_part2 import run_part2
+    for part, run_part in [(1, run_part1), (2, run_part2)]:
+        t0 = time.time()
+        log.info("===== Part %d =====", part)
+        run_part(data_dir, out_dir)
+        log.info("Part %d done", part)
+        print(f"Part {part} done in {time.time() - t0:.1f} s")  # console only, keeps run.log deterministic
 
 
 if __name__ == "__main__":

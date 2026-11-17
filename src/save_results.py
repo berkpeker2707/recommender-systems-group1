@@ -39,9 +39,13 @@ def build_result_row(part: int, model, split_name: str, seed: int, summary: dict
 def save_results_csv(result_rows: list, path: Path, part: int):
     # list of row dicts -> table; columns= forces the fixed column order
     results = pd.DataFrame(result_rows, columns=RESULT_COLUMNS)
-    # Part 2-3: uncomment to keep the rows of the other parts in results.csv
-    # if path.exists():
-    #     previous_results = pd.read_csv(path)
-    #     results = pd.concat([previous_results[previous_results["Part"] != part], results], ignore_index=True)
-    # overwrite the file; no index column, numbers rounded to 5 decimals
-    results.to_csv(path, index=False, float_format="%.5f")
+    # numbers as text with 5 decimals (e.g. 0.21195), the same as the rows already in the file
+    for column in results.select_dtypes("float").columns:
+        results[column] = results[column].map(lambda value: f"{value:.5f}")
+    # keep the rows of the other parts that are already in results.csv, replace only this part's rows
+    if path.exists():
+        # read as text, so the old rows are written back exactly as they were
+        previous_results = pd.read_csv(path, dtype=str, keep_default_na=False)
+        results = pd.concat([previous_results[previous_results["Part"] != str(part)], results], ignore_index=True)
+    # overwrite the file; no index column
+    results.to_csv(path, index=False)
