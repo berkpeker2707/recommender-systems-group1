@@ -41,13 +41,13 @@ The run is deterministic, so it regenerates the committed files exactly.
 
 Python 3.11.17. All versions are pinned in `requirements.txt`.
 
-| Library    | Version | What we use it for                                               |
-| ---------- | ------- | ---------------------------------------------------------------- |
-| numpy      | 2.4.6   | arrays and maths                                                 |
-| pandas     | 3.1.0   | reading, splitting and writing tables                            |
-| scipy      | 1.17.1  | sparse user × movie matrices; t-distribution for 95% CIs         |
-| matplotlib | 3.11.2  | all figures                                                      |
-| pytest     | 9.2.0   | unit tests only                                                  |
+| Library    | Version | What we use it for                                                   |
+| ---------- | ------- | -------------------------------------------------------------------- |
+| numpy      | 2.4.6   | arrays and maths                                                     |
+| pandas     | 3.1.0   | reading, splitting and writing tables                                |
+| scipy      | 1.17.1  | sparse user × movie matrices; t-distribution for 95% CIs             |
+| matplotlib | 3.11.2  | all figures                                                          |
+| pytest     | 9.2.0   | unit tests only                                                      |
 | ruff       | 0.17.3  | code formatting only (`ruff format .`, settings in `pyproject.toml`) |
 
 **No recommender-system library is used.** All models, the split and all metrics are our own code.
@@ -68,11 +68,11 @@ Python 3.11.17. All versions are pinned in `requirements.txt`.
 
 ### Three new models, all self-implemented (no library code)
 
-| model         | file                            | paradigm         | idea                                                              | lecture             |
-| ------------- | ------------------------------- | ---------------- | ----------------------------------------------------------------- | ------------------- |
-| User-kNN      | `src/models/user_knn.py`        | neighbourhood CF | find the most similar users; recommend what they rated            | 1.2, slides 5–10    |
-| BPR-MF        | `src/models/bpr.py`             | ranking-loss CF  | learn user and movie vectors so a rated movie scores above an unrated one | 2.1, slides 4, 11–12 |
-| Content-based | `src/models/content_based.py`   | content-based    | user profile from the genres and decade of rated movies; cosine match | 2.2, slides 4–7     |
+| model         | file                          | paradigm         | idea                                                                      | lecture              |
+| ------------- | ----------------------------- | ---------------- | ------------------------------------------------------------------------- | -------------------- |
+| User-kNN      | `src/models/user_knn.py`      | neighbourhood CF | find the most similar users; recommend what they rated                    | 1.2, slides 5–10     |
+| BPR-MF        | `src/models/bpr.py`           | ranking-loss CF  | learn user and movie vectors so a rated movie scores above an unrated one | 2.1, slides 4, 11–12 |
+| Content-based | `src/models/content_based.py` | content-based    | user profile from the genres and decade of rated movies; cosine match     | 2.2, slides 4–7      |
 
 All models share one interface (`fit`, `score`, `params`) in `src/models/base.py`.
 
@@ -80,15 +80,15 @@ All models share one interface (`fit`, `score`, `params`) in `src/models/base.py
 
 The assignment lists seven paradigms; two models from the same paradigm count as one.
 
-| paradigm             | examples given in the assignment                                   | lecture            | our choice    |
-| -------------------- | ------------------------------------------------------------------ | ------------------ | ------------- |
-| neighbourhood CF     | user-based kNN; item-kNN with another similarity or normalization  | 1.2, slides 5–10   | User-kNN      |
-| latent-factor CF     | matrix factorization with biases and regularization; the same with ALS | 2.1, slides 4, 7–9 | –             |
-| ranking-loss CF      | BPR or another pairwise objective                                  | 2.1, slides 11–12  | BPR-MF        |
-| content-based        | profile matching over genre and release-year metadata              | 2.2, slides 4–7    | Content-based |
-| hybrid               | weighted, switching, cascade, feature combination, meta-level      | 2.2, slide 10      | –             |
-| neural               | autoencoder or Mult-VAE; two-tower                                  | 3.2, slides 7, 9–10 | –            |
-| sequential           | Markov chains; session-kNN; GRU4Rec; SASRec                        | 4.1, slides 6, 8–9 | –             |
+| paradigm         | examples given in the assignment                                       | lecture             | our choice    |
+| ---------------- | ---------------------------------------------------------------------- | ------------------- | ------------- |
+| neighbourhood CF | user-based kNN; item-kNN with another similarity or normalization      | 1.2, slides 5–10    | User-kNN      |
+| latent-factor CF | matrix factorization with biases and regularization; the same with ALS | 2.1, slides 4, 7–9  | –             |
+| ranking-loss CF  | BPR or another pairwise objective                                      | 2.1, slides 11–12   | BPR-MF        |
+| content-based    | profile matching over genre and release-year metadata                  | 2.2, slides 4–7     | Content-based |
+| hybrid           | weighted, switching, cascade, feature combination, meta-level          | 2.2, slide 10       | –             |
+| neural           | autoencoder or Mult-VAE; two-tower                                     | 3.2, slides 7, 9–10 | –             |
+| sequential       | Markov chains; session-kNN; GRU4Rec; SASRec                            | 4.1, slides 6, 8–9  | –             |
 
 Roughly from simple to complex: kNN, content-based, weighted hybrid and Markov chains are the simplest;
 matrix factorization and BPR are in the middle (user and movie vectors learned with SGD); neural and
@@ -128,11 +128,11 @@ long tail) and test period (before / from 2001-06-20).
 
 | model         | low-activity users | high-activity users | popular items | long-tail items | early test | late test |
 | ------------- | ------------------ | ------------------- | ------------- | --------------- | ---------- | --------- |
-| Most Popular  | 0.219              | 0.205               | 0.223         | 0.000           | 0.141      | 0.157     |
+| Most Popular  | 0.219              | 0.204               | 0.223         | 0.000           | 0.141      | 0.157     |
 | Item-kNN      | 0.217              | 0.220               | 0.230         | 0.001           | 0.147      | 0.162     |
 | User-kNN      | 0.211              | 0.214               | 0.224         | 0.000           | 0.143      | 0.157     |
 | BPR           | 0.214              | 0.197               | 0.216         | 0.001           | 0.142      | 0.147     |
-| Content-based | 0.030              | 0.030               | 0.022         | 0.011           | 0.019      | 0.024     |
+| Content-based | 0.030              | 0.030               | 0.022         | 0.011           | 0.019      | 0.023     |
 
 Most Popular is best for low-activity users. On the long tail all collaborative models score about 0;
 only content-based finds some long-tail movies.
