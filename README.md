@@ -128,11 +128,11 @@ long tail) and test period (before / from 2001-06-20).
 
 | model         | low-activity users | high-activity users | popular items | long-tail items | early test | late test |
 | ------------- | ------------------ | ------------------- | ------------- | --------------- | ---------- | --------- |
-| Most Popular  | 0.219              | 0.205               | 0.223         | 0.000           | 0.141      | 0.157     |
+| Most Popular  | 0.219              | 0.204               | 0.223         | 0.000           | 0.141      | 0.157     |
 | Item-kNN      | 0.217              | 0.220               | 0.230         | 0.001           | 0.147      | 0.162     |
 | User-kNN      | 0.211              | 0.214               | 0.224         | 0.000           | 0.143      | 0.157     |
 | BPR           | 0.214              | 0.197               | 0.216         | 0.001           | 0.142      | 0.147     |
-| Content-based | 0.030              | 0.030               | 0.022         | 0.011           | 0.019      | 0.024     |
+| Content-based | 0.030              | 0.030               | 0.022         | 0.011           | 0.019      | 0.023     |
 
 Most Popular is best for low-activity users. On the long tail all collaborative models score about 0;
 only content-based finds some long-tail movies.

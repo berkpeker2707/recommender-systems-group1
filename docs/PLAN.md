@@ -78,7 +78,7 @@ That gives 3 paradigms. All three are our own code; no new library was added.
 
 ## Open questions for the team
 
-1. **Part 3 track (A, B or C) must be announced with this submission.** Track A (diversity /
-   re-ranking) would reuse the genre vectors already built for the content-based model.
+1. ~~Part 3 track~~ **Decided: Track A (diversity and popularity bias)**, announced in the report and
+   the workbook. It reuses the genre vectors already built for the content-based model.
 2. Should the report show all three Most Popular variants, or only the best on validation?
 3. Optional: a weighted hybrid (CF + content, Lecture 2.2 slide 10) for the long-tail result.
