@@ -1,0 +1,16 @@
+Model,Training interactions (%),Precision@10,Recall@10,NDCG@10,Catalogue coverage,Seed(s),Notes
+Most Popular,100,0.19454,0.05660,0.21195,0.03631,42,rank 3; recommended movies have a median of 2323 training ratings
+Item-based kNN,100,0.20043,0.06503,0.21851,0.14293,42,rank 1; recommended movies have a median of 1631 training ratings
+User-based kNN,100,0.19255,0.05948,0.21284,0.08112,42,rank 2; recommended movies have a median of 2107 training ratings
+BPR matrix factorization,100,0.18730,0.05914,0.20527,0.15230,"42, 43, 44, 45, 46",rank 4; recommended movies have a median of 1577 training ratings
+Content-based profile matching,100,0.02938,0.00873,0.03014,0.43343,42,rank 5; recommended movies have a median of 138 training ratings
+Most Popular,50,0.19438,0.05662,0.21229,0.03636,"42, 43, 44, 45, 46",rank 1; recommended movies have a median of 1155 training ratings
+Item-based kNN,50,0.16783,0.05221,0.18329,0.26243,"42, 43, 44, 45, 46",rank 4; recommended movies have a median of 764 training ratings
+User-based kNN,50,0.18142,0.05506,0.19760,0.08102,"42, 43, 44, 45, 46",rank 3; recommended movies have a median of 1063 training ratings
+BPR matrix factorization,50,0.18428,0.05631,0.20014,0.12011,"42, 43, 44, 45, 46",rank 2; recommended movies have a median of 874 training ratings
+Content-based profile matching,50,0.02700,0.00774,0.02951,0.43976,"42, 43, 44, 45, 46",rank 5; recommended movies have a median of 71 training ratings
+Most Popular,20,0.19369,0.05545,0.21153,0.03652,"42, 43, 44, 45, 46",rank 1; recommended movies have a median of 462 training ratings
+Item-based kNN,20,0.01643,0.00559,0.01684,0.44996,"42, 43, 44, 45, 46",rank 5; recommended movies have a median of 4 training ratings
+User-based kNN,20,0.15726,0.04540,0.17146,0.10888,"42, 43, 44, 45, 46",rank 3; recommended movies have a median of 397 training ratings
+BPR matrix factorization,20,0.17646,0.04692,0.18806,0.04527,"42, 43, 44, 45, 46",rank 2; recommended movies have a median of 431 training ratings
+Content-based profile matching,20,0.02539,0.00593,0.02781,0.45722,"42, 43, 44, 45, 46",rank 4; recommended movies have a median of 31 training ratings

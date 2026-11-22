@@ -10,7 +10,7 @@ from src.evaluation.metrics import catalogue_coverage, ndcg_at_k, precision_at_k
 
 # returns the top 10 movie_index for each user, one row per user
 # example: [[260, 1196, 2571, ...], [...]]
-def _recommend_top_movies(model, seen_movies, users, list_size: int):
+def recommend_top_movies(model, seen_movies, users, list_size: int):
     # the model gives a score to every movie for every user (users x 3883)
     scores = np.asarray(model.score(users), dtype=np.float64)
     # movies the user already saw in training get -inf, so they can never be in the top 10
@@ -23,7 +23,13 @@ def _recommend_top_movies(model, seen_movies, users, list_size: int):
 # example return: {"precision@10": 0.200, "recall@10": 0.065, "ndcg@10": 0.219, "coverage@10": 0.143, "n_users": 1154}
 def evaluate_model(model, seen_movies, relevant_movies: dict, users, list_size: int = 10):
     users = np.asarray(users)
-    recommendation_lists = _recommend_top_movies(model, seen_movies, users, list_size)
+    recommendation_lists = recommend_top_movies(model, seen_movies, users, list_size)
+    return evaluate_lists(recommendation_lists, users, relevant_movies, seen_movies.shape[1], list_size)
+
+
+# the metric part of evaluate_model, for top-10 lists that are already made
+# Part 2 uses it directly to score the same lists against a subset of users or movies
+def evaluate_lists(recommendation_lists, users, relevant_movies: dict, n_movies: int, list_size: int = 10):
     rows = []
     # go through users one by one, together with their top 10 list
     for user_index, recommended in zip(users, recommendation_lists):
@@ -38,6 +44,6 @@ def evaluate_model(model, seen_movies, relevant_movies: dict, users, list_size: 
     # average over all users
     summary = per_user.drop(columns="user_index").mean().to_dict()
     # coverage looks at all lists together, so it's not per user
-    summary[f"coverage@{list_size}"] = catalogue_coverage(recommendation_lists, seen_movies.shape[1])
+    summary[f"coverage@{list_size}"] = catalogue_coverage(recommendation_lists, n_movies)
     summary["n_users"] = len(users)
-    return summary, per_user  # Part 3: also return recommendation_lists, re-ranking needs them
+    return summary, per_user

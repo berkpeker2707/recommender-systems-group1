@@ -1,0 +1,6 @@
+Model,Paradigm,Self-implemented?,Key hyperparameters,Precision@10,Recall@10,NDCG@10,Catalogue coverage,Variability / CI / test,Seed(s),Notes
+Most Popular,Popularity (Part 1 baseline),No (Part 1 baseline),variant=pop_alltime_positive,0.19454,0.05660,0.21195,0.03631,NDCG@10 95% CI ± 0.0144 over users; vs item-kNN: -0.0066 ± 0.0093 (not significant),42,1154 test users
+Item-based kNN,Neighbourhood CF (Part 1 baseline),No (Part 1 baseline),"similarity=adjusted_cosine, k=50",0.20043,0.06503,0.21851,0.14293,NDCG@10 95% CI ± 0.0140 over users,42,1154 test users
+User-based kNN,Neighbourhood CF,Yes - src/models/user_knn.py,"similarity=pearson, k=200",0.19255,0.05948,0.21284,0.08112,NDCG@10 95% CI ± 0.0140 over users; vs item-kNN: -0.0057 ± 0.0095 (not significant),42,1154 test users
+BPR matrix factorization,Ranking-loss CF,Yes - src/models/bpr.py,"epochs=10, reg=0.03",0.18730,0.05914,0.20527,0.15230,NDCG@10 95% CI ± 0.0128 over users; vs item-kNN: -0.0132 ± 0.0093 (significant); NDCG@10 95% CI ± 0.0039 over 5 seeds,"42, 43, 44, 45, 46",1154 test users
+Content-based profile matching,Content-based,Yes - src/models/content_based.py,"profile=centered, year_weight=0.25",0.02938,0.00873,0.03014,0.43343,NDCG@10 95% CI ± 0.0048 over users; vs item-kNN: -0.1884 ± 0.0138 (significant),42,1154 test users
